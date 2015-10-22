@@ -234,7 +234,7 @@
 				f.@num1 = m.momentNumber;
 				f.@name = m.momentName;
 				f.@value = m.momentValue;
-				f.@dimension = m.dimension;
+				f.@dimension = m.units;
 				f.@isClockwise = m.isClockWise;
 				
 				outData.momentsList.appendChild(f);

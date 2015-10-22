@@ -18,10 +18,10 @@
       okButton.y = 80;
       cancelButton.y = 80;
 
-      dimension1 = new ComBox(45, 20, new Array("Н*м", "Н*см", "Н*мм", "кН*м", "кН*см", "кН*мм"));
-      dimension1.x = 70;
-      dimension1.y = -10;
-      addChild(dimension1);
+      units = new ComBox(45, 20, new Array("Н*м", "Н*см", "Н*мм", "кН*м", "кН*см", "кН*мм"));
+      units.x = 70;
+      units.y = -10;
+      addChild(units);
 
       this.forceName.y = -40;
       this.forceValue.y = 20;
@@ -35,31 +35,32 @@
       addChild(backgrnd);
     }
 
-    public function get dimension():String
+    public function get units():String
     {
-      return dimension1.textInBox;
+      return _units.textInBox;
     }
 
-    public function set dimension(s:String)
+    public function set units(s:String)
     {
-      switch(s){
+      switch(s)
+      {
         case "H":
-          dimension1.numberOfText = 0;
+          units.numberOfText = 0;
           break;
         case "Н*см":
-          dimension1.numberOfText = 1;
+          units.numberOfText = 1;
           break;
         case "Н*мм":
-          dimension1.numberOfText = 2;
+          units.numberOfText = 2;
           break;
         case "кН*м":
-          dimension1.numberOfText = 3;
+          units.numberOfText = 3;
           break;
         case "кН*см":
-          dimension1.numberOfText = 4;
+          units.numberOfText = 4;
           break;
         case "кН*мм":
-          dimension1.numberOfText = 5;
+          units.numberOfText = 5;
       }
     }
   }

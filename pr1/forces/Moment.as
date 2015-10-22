@@ -5,6 +5,9 @@
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.events.Event;
+  
+  import pr1.events.DialogEvent;
+  
 	import pr1.windows.EditWindowMoment;
 	import pr1.windows.EditWindow;
 	import pr1.Shapes.Segment;
@@ -18,7 +21,7 @@
 		private var ownerSegmentOfForce:Segment;
 		private var momentName1:String;
 		private var momentValue1:String;
-		private var dimension1:String;
+		private var _units:String;
 		public var momentNumber:int;
 		
 		private var button:SimpleButton;
@@ -51,33 +54,48 @@
 			dispatchEvent( new Event(ComConst.LOCK_ALL, true));
 			momentSignatureCoord = new Point(momentSignature.x, momentSignature.y);
 			
-			dialogWnd = new EditWindowMoment(momentValue1, momentName1);
-			dialogWnd.dimension = dimension1;
-			dialogWnd.x = 400;
-			dialogWnd.y = 300;
-			parent1.addChild(dialogWnd);
-			dialogWnd.addEventListener(EditWindow.END_EDIT, onEndDialog);
-			dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
+			initDialog();
 		}
 		
-		private function onEndDialog(e:Event){
-			dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-			dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
+		private function onEndDialog(e:DialogEvent)
+    {
+      releaseDialog();
 
-			parent1.removeChild(dialogWnd);
-			momentName = dialogWnd.force;
-			momentValue = dialogWnd.value;
-			dimension = dialogWnd.dimension;
-			dialogWnd = null;
+      if(e.canceled)
+        deleteElement();
+      else
+        createMoment(e.eventData);
+      
 			dispatchEvent(new Event(ComConst.CHANGE_ELEMENT, true));
 		}
 		
-		private function onCancelDialog(e:Event){
-			dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-			dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
+    private function initDialog()
+    {
+      dialogWnd = new EditWindowMoment(momentValue1, momentName1);
+			dialogWnd.units = units;
+			dialogWnd.x = 400;
+			dialogWnd.y = 300;
+			parent1.addChild(dialogWnd);
+			dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
+    }
+    
+    private function releaseDialog()
+    {
+      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
 
 			parent1.removeChild(dialogWnd);
-			dialogWnd = null;
+      dialogWnd = null;
+    }
+
+    private function changeValues(data:Object)
+    {
+      momentName = data.forceName;
+			momentValue = data.forceValue;
+			units = data.units;
+    }
+    
+		private function deleteElement()
+    {
 			mustBeDeleted = true;
 			dispatchEvent(new Event(ComConst.DELETE_ELEMENT, true));
 		}
@@ -129,12 +147,12 @@
 			return ownerSegmentOfForce;
 		}
 		
-		public function set dimension(dim:String){
-			dimension1 = dim;
+		public function set units(val:String){
+			_units = val;
 		}
 		
-		public function get dimension():String{
-			return dimension1;
+		public function get units():String{
+			return _units;
 		}
 		
 		public function lock(){

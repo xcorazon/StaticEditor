@@ -40,10 +40,10 @@
       }
       addChild(angleNameField);
 
-      dimension1 = new ComBox(35, 20, new Array("Н","кН"));
-      dimension1.x = 70;
-      dimension1.y = -30;
-      addChild(dimension1);
+      _units = new ComBox(35, 20, new Array("Н","кН"));
+      _units.x = 70;
+      _units.y = -30;
+      addChild(_units);
 
       txtFormat.font = "Arial";
       txtFormat.size = 12;
@@ -71,25 +71,20 @@
       }
 
     }
-
-    override public function okListener(e:MouseEvent)
+    
+    override protected function fieldsEmpty():Boolean
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
-
-      if(forceName.length == 0 || forceValue.length == 0 || (angleName.length == 0 && !(angle == "0" || angle == "90" || angle == "180")))
-      {
-        // вывести окно с повтором ввода
-        trace("forceName ",forceName.text," forceValue ",forceValue.text);
-        errWindow.addEventListener("EndError", errorListener);
-        addChild(errWindow);
-      }
-      else
-      {
-        // послать сообщение об окончании ввода
-        dispatchEvent(new Event(EditWindow.END_EDIT));
-        dimension1.destroy();
-      }
+      return forceName.length == 0 || forceValue.length == 0 || (angleName.length == 0 && !(angle == "0" || angle == "90" || angle == "180"));
+    }
+    
+    override protected function setEventData():Object
+    {
+      var data:Object = super.setEventData();
+      
+      data.angleName = angleName;
+      data.angleValue = angle;
+      
+      return data;
     }
 
     override internal function addBackground():void
@@ -109,20 +104,20 @@
       return angleField.text;
     }
 
-    public function get dimension():String
+    public function get units():String
     {
-      return dimension1.textInBox;
+      return _units.textInBox;
     }
 
-    public function set dimension(s:String)
+    public function set units(s:String)
     {
       if( s == "Н")
       {
-        dimension1.numberOfText = 0;
+        _units.numberOfText = 0;
       }
       if( s == "кН")
       {
-        dimension1.numberOfText = 1;
+        _units.numberOfText = 1;
       }
     }
   }

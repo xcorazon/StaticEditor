@@ -63,7 +63,7 @@
 			dialogWnd = new EditWindow3(forceValue1, forceName1, angleName1, angleValue1);
 			dialogWnd.x = 400;
 			dialogWnd.y = 300;
-			dialogWnd.dimension = dimension1;
+			dialogWnd.units = dimension1;
 			parent1.addChild(dialogWnd);
 			dialogWnd.addEventListener(EditWindow.END_EDIT, onEndDialog);
 			dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);

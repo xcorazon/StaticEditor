@@ -3,10 +3,10 @@
 package pr1.windows
 {
   import flash.display.*;
-  import pr1.EditEvent;
   import flash.events.*;
   import flash.text.*;
   import pr1.panels.ComBox;
+  import pr1.events.DialogEvent;
 
   public class EditWindow extends Sprite
   {
@@ -22,7 +22,7 @@ package pr1.windows
     // окно с ошибкой
     internal var errWindow:Sprite;
     //размерность нагрузки
-    internal var dimension1:ComBox;
+    protected var _units:ComBox;
 
     //кнопки
     internal var okButton:SimpleButton;
@@ -45,7 +45,8 @@ package pr1.windows
       forceName.maxChars = 6;
       forceName.defaultTextFormat = txtFormat;
       addChild(forceName);
-      if(name != null) forceName.text = name;
+      if(name != null) 
+        forceName.text = name;
 
 
       forceValue = new TextField();
@@ -60,7 +61,8 @@ package pr1.windows
       forceValue.restrict = "0-9.";
       forceValue.multiline = false;
       addChild(forceValue);
-      if(value != "") forceValue.text = value;
+      if(value != "") 
+        forceValue.text = value;
 
       errWindow = new ErrorDialog();
       errWindow.x = -65;
@@ -80,11 +82,22 @@ package pr1.windows
       cancelButton.height = 29;
       addChild(cancelButton);
 
-      okButton.addEventListener(MouseEvent.CLICK, okListener);
-      cancelButton.addEventListener(MouseEvent.CLICK, cancelListener);
-
+      initEvents()
+    }
+    
+    protected function initEvents()
+    {
+      okButton.addEventListener(MouseEvent.CLICK, onOk);
+      cancelButton.addEventListener(MouseEvent.CLICK, onCancel);
+    }
+    
+    protected function releaseEvents()
+    {
+      cancelButton.removeEventListener(MouseEvent.CLICK, onCancel);
+      okButton.removeEventListener(MouseEvent.CLICK, onOk);
     }
 
+    
     internal function addBackground():void
     {
       backgrnd = new Dialog1();
@@ -92,54 +105,68 @@ package pr1.windows
       addChild(backgrnd);
     }
 
-    public function okListener(e:MouseEvent)
+    
+    public function onOk(e:MouseEvent)
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
+      releaseEvents();
 
-      if(forceName.length == 0 || forceValue.length == 0)
+      if(fieldsEmpty())
+        showError();
+      else
+        endDialog();
+    }
+    
+    
+    protected function fieldsEmpty():Boolean
+    {
+      return forceName.length == 0 || forceValue.length == 0;
+    }
+    
+    
+    private function endDialog(isCanceled = false)
+    {
+      var event:DialogEvent = new DialogEvent(DialogEvent.END_DIALOG);
+      if (!isCanceled)
       {
-        // вывести окно с повтором ввода
-        trace("forceName ",forceName.text," forceValue ",forceValue.text);
-        errWindow.addEventListener("EndError", errorListener);
-        addChild(errWindow);
+        event.eventData = setEventData();
       }
       else
-      {
-        // послать сообщение об окончании ввода
-        dispatchEvent( new Event(END_EDIT));
-        dimension1.destroy();
-      }
+        event.canceled = true;
+        
+      dispatchEvent(event);
+      _units.destroy();
+    }
+    
+    protected function setEventData():Object
+    {
+      var data:Object = new Object();
+      data.forceName = forceName;
+      data.forceValue = Number(forceValue);
+      data.units = _units.textInBox;
+      
+      return data;
+    }
+    
+    
+    public function onCancel(e:MouseEvent)
+    {
+      releaseEvents();
+      endDialog(true);
+    }
+    
+    
+    protected function showError()
+    {
+      errWindow.addEventListener("EndError", onError);
+      addChild(errWindow);
     }
 
-    public function cancelListener(e:MouseEvent)
+    
+    public function onError(e:Event)
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
-      forceName.text = "";
-      forceValue.text = "";
-
-      // послать сообщение об окончании ввода
-      dispatchEvent(new Event(CANCEL_EDIT));
-      dimension1.destroy();
-    }
-
-    public function errorListener(e:Event)
-    {
-      errWindow.removeEventListener("EndError", errorListener);
-      okButton.addEventListener(MouseEvent.CLICK, okListener);
-      cancelButton.addEventListener(MouseEvent.CLICK, cancelListener);
+      errWindow.removeEventListener("EndError", onError);
       removeChild(errWindow);
-    }
-
-    public function get value():String
-    {
-      return forceValue.text;
-    }
-
-    public function get force():String
-    {
-      return forceName.text;
+      initEvents();
     }
   }
 }

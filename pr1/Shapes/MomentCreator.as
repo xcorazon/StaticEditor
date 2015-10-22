@@ -3,8 +3,12 @@
   import flash.display.SimpleButton;
   import flash.display.Sprite;
   import flash.events.MouseEvent;
+  
   import flash.geom.Point;
   import flash.events.Event;
+  
+  import pr1.events.DialogEvent;
+  
   import pr1.panels.MomentPanel;
   import pr1.Shapes.ArcArrow;
   import pr1.CoordinateTransformation;
@@ -14,6 +18,7 @@
   import pr1.forces.Moment;
   import pr1.Snap;
   import pr1.Frame;
+  
 
   public class MomentCreator extends Creator
   {
@@ -31,9 +36,6 @@
     private var arrow:ArcArrow;
     private var arrowAngle:Number;
     private var arrowCoordinates:Point;   // координаты стрелки на экране
-    private var momentName:String;
-    private var momentValue:String;
-    private var dimension:String;
     private var isClockWise:Boolean;
 
     private var button_up:ArcArrow;
@@ -181,39 +183,48 @@
 
       arrowAngle = arrow.angleOfTip;
 
+      initDialog();
+    }
+    
+    private function initDialog()
+    {
       dialogWnd = new EditWindowMoment("","");
       parent1.addChild(dialogWnd);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-
-    private function onEndEditInDialogWindow(e:Event)
+    
+    private function releaseDialog()
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
+      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
+      
       parent1.removeChild(dialogWnd);
       parent1.removeChild(arrow);
-
-      momentName = dialogWnd.force;
-      momentValue = dialogWnd.value;
-      dimension = dialogWnd.dimension;
       dialogWnd = null;
-      doCreateMoment();
-      dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
-    private function doCreateMoment()
+    
+    private function onEndDialog(e:DialogEvent)
+    {
+      releaseDialog();
+      
+      if(e.canceled)
+        creationCancel();
+      else
+        createMoment(e.eventData);
+    }
+
+    private function createMoment(data:Object)
     {
       var p:Point;
       var angle:Number;
-      moment = new Moment(parent1, button_up, button_over, button_down, button_hit, momentName);
+      moment = new Moment(parent1, button_up, button_over, button_down, button_hit, data.forceName);
 
-      moment.dimension = dimension;
+      moment.units = data.units;
+      moment.momentValue = data.forceValue;
+      
       moment.segment = highlightedSegment;
-      moment.momentValue = momentValue;
       moment.momentNumber = momentNumber;
       moment.isClockWise = this.isClockWise;
       p = Point.polar(40, arrowAngle);
@@ -221,17 +232,12 @@
       moment.setCoordOfMomentName(p);
       moment.x = arrowCoordinates.x;
       moment.y = arrowCoordinates.y;
+      
+      dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
-    private function onCancelEditInDialogWindow(e:Event)
+    private function creationCancel()
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(arrow);
-
-      dialogWnd = null;
       dispatchEvent(new Event(ConcentratedForceCreator.CREATE_CANCEL));
     }
 

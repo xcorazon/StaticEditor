@@ -549,7 +549,7 @@
       for each ( var m:Moment in mForces){
         if(m.momentName == moment.momentName){
           m.momentValue = moment.momentValue;
-          m.dimension = moment.dimension;
+          m.units = moment.units;
         }
       }
     }
