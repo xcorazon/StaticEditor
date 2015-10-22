@@ -13,18 +13,14 @@
   import pr1.windows.EditWindow;
   import pr1.forces.Moment;
   import pr1.Snap;
+  import pr1.Frame;
 
-  public class MomentCreator extends Sprite
+  public class MomentCreator extends Creator
   {
     // события в объекте
     public static const CREATE_CANCEL:String = "Cancel creation of moment";
     public static const CREATE_DONE:String = "Done creation of moment";
-    // константы для внутреннего использования
-    private static const SELECT_SEGMENT:int = 0;
-    private static const SELECT_POSITION:int = 1;
-    private static const SELECT_ANGLE:int = 2;
 
-    private var parent1:*;
     private var segments:Array;
     private var momentNumber:int;
     private var highlightedSegment:Segment;
@@ -49,37 +45,32 @@
 
     private var dialogWnd:EditWindowMoment;
 
-    private var doNow:int;
 
-    public function MomentCreator(parent:*, segments:Array, lastNonusedForceNumber:int)
+    public function MomentCreator(frame:Frame)
     {
-      this.parent1 = parent;
-      this.segments = segments;
-      this.doNow = SELECT_SEGMENT;
+      super(frame);
+      this.segments = frame.Segments;
       this.highlightedSegment = null;
-      this.momentNumber = lastNonusedForceNumber;
+      this.momentNumber = frame.lastNonUsedMoment;
       snap = parent1.snap;
 
-      parent1.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      initHandlers();
+      initEvents();
     }
 
-    private function onMouseMove(e:MouseEvent)
+    private function initHandlers()
     {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doHighlightSegment(e);
-          break;
-        case SELECT_POSITION:
-          doMoveArrow(e);
-          break;
-        case SELECT_ANGLE:
-          doRotateArrow(e);
-      }
+      moveHandlers[0] = highlightSegment;
+      moveHandlers[1] = moveArrow;
+      moveHandlers[2] = rotateArrow;
+
+      downHandlers[0] = selectSegment;
+      downHandlers[1] = fixPosition;
+      downHandlers[2] = fixAngle;
     }
 
-    private function doHighlightSegment(e)
+
+    private function highlightSegment(e)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -123,7 +114,7 @@
       }
     }
 
-    private function doMoveArrow(e:MouseEvent){
+    private function moveArrow(e:MouseEvent){
       var p:Point;
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       p = snap.doSnapToSegment(cursorPosition, highlightedSegment);
@@ -133,7 +124,7 @@
       arrowCoordinates = p;
     }
 
-    private function doRotateArrow(e:MouseEvent)
+    private function rotateArrow(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       parent1.removeChild(arrow);
@@ -148,29 +139,16 @@
       parent1.addChild(arrow);
     }
 
-    private function onMouseDown(e:MouseEvent)
-    {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doSelectSegment(e);
-          break;
-        case SELECT_POSITION:
-          doSelectPosition();
-          break;
-        case SELECT_ANGLE:
-          doSelectAngle();
-      }
-    }
 
-    private function doSelectSegment(e:MouseEvent)
+    private function selectSegment(e:MouseEvent)
     {
       var angle:Number;
       var p:Point;
       var positionOfArrow:Point;
       if( this.highlightedSegment != null)
       {
-        doNow = SELECT_POSITION;
+        nextHandlers();
+
         highlightedSegment.setColor(0x0);
         positionOfArrow = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
         positionOfArrow = snap.doSnapToForce( positionOfArrow, highlightedSegment);
@@ -182,20 +160,21 @@
       }
     }
 
-    private function doSelectPosition()
+    private function fixPosition(e:MouseEvent)
     {
       panel = new MomentPanel();
       panel.x = 800-135;
-      doNow = SELECT_ANGLE;
+
+      nextHandlers();
 
       parent1.addChild(panel);
     }
 
-    private function doSelectAngle()
+    private function fixAngle(e:MouseEvent)
     {
       // убираем всех прослушивателей событий
-      parent1.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      releaseEvents();
+
       this.isClockWise = panel.isMomentClockWise;
       panel.destroy();
       parent1.removeChild(panel);
