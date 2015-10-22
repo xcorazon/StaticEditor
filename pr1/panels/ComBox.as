@@ -6,7 +6,8 @@
   import flash.events.*;
   import flash.text.*;
   
-  public class ComBox extends Sprite{
+  public class ComBox extends Sprite
+  {
     
     private var strings:Array;
     public var num:int = 0; // номер отображаемого элемента
@@ -17,7 +18,8 @@
     private var w:Number;
     private var h:Number;
     
-    public function ComBox( w:Number, h:Number, strings:Array){
+    public function ComBox( w:Number, h:Number, strings:Array)
+    {
 
       this.strings = strings;
       
@@ -79,7 +81,8 @@
       shape1.graphics.drawRect(0,0,this.w, this.h);
       shape1.graphics.endFill();
       
-      for(var i:int = 0; i< strings.length; i++){
+      for(var i:int = 0; i< strings.length; i++)
+      {
         txt1 = new TextField();
         txt1.text = strings[i];
         txt1.width = this.w;
@@ -113,10 +116,10 @@
     
     private function onPopupClick(e:MouseEvent)
     {
-      
       var i:int = int(Math.floor(e.target.y / this.h));
       this.num = i;
       this.defaultText.text = strings[i];
+      
       popupWindow.removeEventListener(MouseEvent.CLICK, onPopupClick);
       this.stage.removeEventListener(MouseEvent.CLICK, onClickOut);
       defaultText.addEventListener(MouseEvent.CLICK, onDefaultTextClick);
@@ -135,6 +138,5 @@
         isPopupClose = true;
       }
     }
-    
   }
 }
