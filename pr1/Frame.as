@@ -517,7 +517,7 @@
     private function updateConcentratedForcesAndAngles(force:ConcentratedForce){
       for each (var f:ConcentratedForce in pForces){
         if(f.forceName == force.forceName){
-          f.dimension = force.dimension;
+          f.units = force.units;
           f.forceValue = force.forceValue;
         }
         if(f.angleName == force.angleName && force.angleName != ""){

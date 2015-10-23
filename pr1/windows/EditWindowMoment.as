@@ -19,44 +19,45 @@
       okButton.y = 80;
       cancelButton.y = 80;
 
-      units = new ComBox(45, 20, new Array("Н*м", "Н*см", "Н*мм", "кН*м", "кН*см", "кН*мм"));
-      units.x = 70;
-      units.y = -10;
-      addChild(units);
+      _units = new ComBox(45, 20, new Array("Н*м", "Н*см", "Н*мм", "кН*м", "кН*см", "кН*мм"));
+      _units.x = 70;
+      _units.y = -10;
+      addChild(_units);
 
-      this.forceName.y = -40;
-      this.forceValue.y = 20;
+      _children.forceName.y = -40;
+      _children.forceValue.y = 20;
     }
 
 
-    override internal function addBackground():void
+    override protected function addBackground():void
     {
       backgrnd = new Dialog2();
       backgrnd.stop();
       addChild(backgrnd);
     }
 
-    public function set dimension(s:String)
+    
+    public function set units(s:String)
     {
       switch(s)
       {
         case "H*м":
-          units.numberOfText = 0;
+          _units.numberOfText = 0;
           break;
         case "Н*см":
-          units.numberOfText = 1;
+          _units.numberOfText = 1;
           break;
         case "Н*мм":
-          units.numberOfText = 2;
+          _units.numberOfText = 2;
           break;
         case "кН*м":
-          units.numberOfText = 3;
+          _units.numberOfText = 3;
           break;
         case "кН*см":
-          units.numberOfText = 4;
+          _units.numberOfText = 4;
           break;
         case "кН*мм":
-          units.numberOfText = 5;
+          _units.numberOfText = 5;
       }
     }
   }

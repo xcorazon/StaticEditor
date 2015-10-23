@@ -182,7 +182,7 @@
 				f.@num1 = p.forceNumber;
 				f.@name = p.forceName;
 				f.@value = p.forceValue;
-				f.@dimension = p.dimension;
+				f.@dimension = p.units;
 				var name1:String;
 				if(p.angleName == "")
 				{

@@ -12,221 +12,161 @@
   import pr1.Shapes.Designation;
   import pr1.ComConst;
   import flash.text.Font;
+  import pr1.Frame;
 
 
-  public class ConcentratedForce extends Sprite
+  public class ConcentratedForce extends Element
   {
 
     public var anglePoints:Array;
-    private var angleSign1:int; // в локальной системе координат угол положительный или отрицательный
-    private var ownerSegmentOfForce:Segment;
-    private var forceName1:String;
-    private var forceValue1:String;
-    private var angleName1:String;
-    private var angleValue1:String;
-    private var dimension1:String;
-    public  var forceNumber:int;
 
-    private var button:SimpleButton;
-    private var dialogWnd:EditWindow3;
-
-    private var forceSignature:Designation = null;
-    private var angleSignature:Designation = null;
-    private var forceSignatureCoord:Point;
-    private var angleSignatureCoord:Point;
-    private var parent1:*;
-    private var timesFont:Font;
-    private var symFont:Font;
-
-    public function ConcentratedForce(parent:*, upState:DisplayObject = null,
+    public function ConcentratedForce(frame:Frame, upState:DisplayObject = null,
                       overState:DisplayObject = null,
                       downState:DisplayObject = null,
                       hitTestState:DisplayObject = null,
                       forceName:String = null,
                       angleName:String = null)
     {
-      // constructor code
-      super();
-      timesFont = new Times1();
-      //symFont = new Symbol1();
-      parent1 = parent;
-      button = new SimpleButton(upState, overState, downState, hitTestState);
-      addChild(button);
+      super(frame, upState, overState, downState, hitTestState);
+
       this.forceName = forceName;
       this.angleName = angleName;
-
-      button.addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
     private function onMouseClick(e:MouseEvent)
     {
       dispatchEvent( new Event(ComConst.LOCK_ALL, true));
-      forceSignatureCoord = new Point(forceSignature.x, forceSignature.y);
-      angleSignatureCoord = new Point(angleSignature.x, angleSignature.y);
+      sigPoses.force = new Point(signatures.force.x, signatures.force.y);
+      sigPoses.angle = new Point(signatures.angle.x, signatures.angle.y);
 
-      dialogWnd = new EditWindow3(forceValue1, forceName1, angleName1, angleValue1);
+      dialogWnd = new EditWindow3(forceValue, forceName, angleName, angleValue);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
-      dialogWnd.units = dimension1;
+      dialogWnd.units = units;
       parent1.addChild(dialogWnd);
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    private function onEndDialog(e:Event)
+    
+    override protected function changeValues(data:Object)
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      forceName = dialogWnd.force;
-      forceValue = dialogWnd.value;
-      angleName = dialogWnd.angleName;
-      angleValue = dialogWnd.angle;
-      dimension = dialogWnd.dimension;
-      dialogWnd = null;
-      dispatchEvent(new Event(ComConst.CHANGE_ELEMENT, true));
+      forceName  = data.forceName;
+      forceValue = data.forceValue;
+      angleName  = data.angleName;
+      angleValue = data.angleValue;
+      units      = data.units;
     }
-
-    private function onCancelDialog(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      dialogWnd = null;
-      dispatchEvent(new Event(ComConst.DELETE_ELEMENT, true));
-    }
-
+    
+    
     public function setCoordOfForceName(p:Point)
     {
-      forceSignature.x = p.x;
-      forceSignature.y = p.y;
-      forceSignatureCoord = p.clone();
+      signatures.force.x = p.x;
+      signatures.force.y = p.y;
+      sigPoses.force = p.clone();
     }
 
     public function setCoordOfAngleName(p:Point)
     {
-      angleSignature.x = p.x;
-      angleSignature.y = p.y;
-      angleSignatureCoord = p.clone();
+      signatures.angle.x = p.x;
+      signatures.angle.y = p.y;
+      sigPoses.angle = p.clone();
     }
 
     public function set forceValue(value:String)
     {
-      forceValue1 = value;
+      params.forceValue = value;
     }
 
     public function get forceValue():String
     {
-      return forceValue1;
+      return params.forceValue;
     }
 
     public function set angleValue(value:String)
     {
-      angleValue1 = value;
+      params.angleValue = value;
     }
 
     public function get angleValue():String
     {
-      return angleValue1;
+      return params.angleValue;
     }
 
     public function set forceName(value:String)
     {
-      forceName1 = value;
-      if(forceSignature == null)
+      params.forceName = value;
+      if(signatures.force == null)
       {
-        forceSignature = new Designation(forceName1, timesFont.fontName/*"Times New Roman"*/);
-        addChild(forceSignature);
+        signatures.force = new Designation(params.forceName, timesFont.fontName);
+        addChild(signatures.force);
       }
       else
       {
-        removeChild(forceSignature);
-        forceSignature = new Designation(forceName1, timesFont.fontName/*"Times New Roman"*/);
-        addChild(forceSignature);
-        forceSignature.x = forceSignatureCoord.x;
-        forceSignature.y = forceSignatureCoord.y;
+        removeChild(signatures.force);
+        signatures.force = new Designation(params.forceName, timesFont.fontName);
+        addChild(signatures.force);
+        signatures.force.x = sigPoses.force.x;
+        signatures.force.y = sigPoses.force.y;
       }
     }
 
     public function get forceName():String
     {
-      return forceName1;
+      return params.forceName;
     }
 
     public function set angleName(value:String)
     {
-      angleName1 = value;
-      if(angleSignature == null)
+      params.angleName = value;
+      if(signatures.angle == null)
       {
-        angleSignature = new Designation(angleName1, "Symbol1"/*symFont.fontName"Symbol"*/);
-        addChild(angleSignature);
+        signatures.angle = new Designation(angleName, "Symbol1");
+        addChild(signatures.angle);
       }
       else
       {
-        removeChild(angleSignature);
-        angleSignature = new Designation(angleName1, "Symbol1"/*symFont.fontName/*"Symbol"*/);
-        addChild(angleSignature);
-        angleSignature.x = angleSignatureCoord.x;
-        angleSignature.y = angleSignatureCoord.y;
+        removeChild(signatures.angle);
+        signatures.angle = new Designation(angleName, "Symbol1");
+        addChild(signatures.angle);
+        signatures.angle.x = sigPoses.angle.x;
+        signatures.angle.y = sigPoses.angle.y;
       }
     }
 
     public function get angleName():String
     {
-      return angleName1;
+      return params.angleName;
     }
 
-    public function set segment(seg:Segment)
+
+    public function set units(dim:String)
     {
-      ownerSegmentOfForce = seg;
+      params.units = dim;
     }
 
-    public function get segment():Segment
+    public function get units():String
     {
-      return ownerSegmentOfForce;
-    }
-
-    public function set dimension(dim:String)
-    {
-      dimension1 = dim;
-    }
-
-    public function get dimension():String
-    {
-      return dimension1;
+      return params.units;
     }
 
     public function get angleSign():int
     {
-      return angleSign1;
+      return params.angleSign;
     }
 
     public function set angleSign(sign:int)
     {
-      this.angleSign1 = sign;
+      params.angleSign = sign;
     }
-
-    public function lock()
+    
+    public function get forceNumber():int
     {
-      button.hitTestState = null;
-      forceSignature.disable();
-      angleSignature.disable();
+      return params.number;
     }
-
-    public function unlock()
+    
+    public function set forceNumber(val:int)
     {
-      button.hitTestState = button.upState;
-      forceSignature.enable();
-      angleSignature.enable();
-    }
-
-    public function destroy()
-    {
-      button.removeEventListener(MouseEvent.CLICK, onMouseClick);
-      forceSignature.destroy();
-      angleSignature.destroy();
+      params.number = val;
     }
   }
 }

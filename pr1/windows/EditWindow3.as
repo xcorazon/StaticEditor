@@ -20,7 +20,7 @@
       cancelButton.y = 100;
 
       var txtFormat:TextFormat = new TextFormat("Symbol1", 16, 0x0, true);
-      angleNameField = new TextField();
+      var angleNameField:TextField = new TextField();
       with(angleNameField)
       {
         x = 70;
@@ -38,6 +38,7 @@
         if(angleName != null)
           text = angleName;
       }
+      _children.angleName = angleNameField;
       addChild(angleNameField);
 
       _units = new ComBox(35, 20, new Array("Н","кН"));
@@ -47,7 +48,7 @@
 
       txtFormat.font = "Arial";
       txtFormat.size = 12;
-      angleField = new TextField();
+      var angleField:TextField = new TextField();
       with(angleField)
       {
         x = 70;
@@ -63,6 +64,7 @@
         if(angle != "")
           text = angle;
       }
+      _children.angleValue = angleField;
       addChild(angleField);
       if((angle == "0" || angle == "90" || angle == "180") && angleName == "")
       {
@@ -74,7 +76,7 @@
     
     override protected function fieldsEmpty():Boolean
     {
-      return forceName.length == 0 || forceValue.length == 0 || (angleName.length == 0 && !(angle == "0" || angle == "90" || angle == "180"));
+      return super.fieldsEmpty() || (angleName.length == 0 && !(angle == "0" || angle == "90" || angle == "180"));
     }
     
     override protected function setEventData():Object
@@ -82,12 +84,12 @@
       var data:Object = super.setEventData();
       
       data.angleName = angleName;
-      data.angleValue = angle;
+      data.angleValue = Number(angle);
       
       return data;
     }
 
-    override internal function addBackground():void
+    override protected function addBackground():void
     {
       backgrnd = new Dialog3();
       backgrnd.stop();
@@ -96,18 +98,14 @@
 
     public function get angleName():String
     {
-      return angleNameField.text;
+      return _children.angleName.text;
     }
 
     public function get angle():String
     {
-      return angleField.text;
+      return _children.angleValue.text;
     }
 
-    public function get units():String
-    {
-      return _units.textInBox;
-    }
 
     public function set units(s:String)
     {
