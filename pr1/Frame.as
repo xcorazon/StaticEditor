@@ -170,7 +170,7 @@
     private function createConcentratedForce(e:Event)
     {
       lockAllElements();
-      creator = new ConcentratedForceCreator(parent1, segments, lastNonUsedConcentratedForce);
+      creator = new ConcentratedForceCreator(this);
       creator.addEventListener(ConcentratedForceCreator.CREATE_DONE, forceCreationDone);
       creator.addEventListener(ConcentratedForceCreator.CREATE_CANCEL, forceCreationCancel);
     }

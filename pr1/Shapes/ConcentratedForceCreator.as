@@ -13,18 +13,15 @@
   import pr1.windows.EditWindow;
   import pr1.forces.ConcentratedForce;
   import pr1.Snap;
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
 
-  public class ConcentratedForceCreator extends Sprite
+  public class ConcentratedForceCreator extends Creator
   {
     // события в объекте
     public static const CREATE_CANCEL:String = "Cancel creation of concentrated force";
     public static const CREATE_DONE:String = "Done creation of concentrated force";
-    // константы для внутреннего использования
-    private static const SELECT_SEGMENT:int = 0;
-    private static const SELECT_POSITION:int = 1;
-    private static const SELECT_ANGLE:int = 2;
 
-    private var parent1:*;
     private var segments:Array;
     private var forceNumber:int;
     private var highlightedSegment:Segment;
@@ -38,11 +35,6 @@
     private var arrow:Arrow;
     private var arrowAngle:Number;
     private var arrowCoordinates:Point;   // координаты стрелки на экране
-    private var forceName:String;
-    private var forceValue:String;
-    private var angleName:String;
-    private var angleValue:String;
-    private var dimension:String;
 
     private var button_up:Arrow;
     private var button_over:Arrow;
@@ -52,39 +44,31 @@
     private var force:ConcentratedForce = null;
 
 
-    private var dialogWnd:EditWindow3;
-
-    private var doNow:int;
-
-    public function ConcentratedForceCreator(parent, segments:Array, lastNonusedForceNumber:int)
+    public function ConcentratedForceCreator(frame:Frame)
     {
-      this.parent1 = parent;
-      this.segments = segments;
-      this.doNow = SELECT_SEGMENT;
+      super(frame);
+      this.segments = frame.Segments;;
+
       this.highlightedSegment = null;
-      this.forceNumber = lastNonusedForceNumber;
-
+      this.forceNumber = frame.lastNonUsedConcentratedForce;
       this.snap = parent1.snap;
-      parent1.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      
+      initEvents();
+      initHandlers();
     }
-
-    private function onMouseMove(e:MouseEvent)
+    
+    private function initHandlers()
     {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doHighlightSegment(e);
-          break;
-        case SELECT_POSITION:
-          doMoveArrow(e);
-          break;
-        case SELECT_ANGLE:
-          doRotateArrow(e);
-      }
+      moveHandlers[0] = highlightSegment;
+      moveHandlers[1] = moveArrow;
+      moveHandlers[2] = rotateArrow;
+
+      downHandlers[0] = selectSegment;
+      downHandlers[1] = fixPosition;
+      downHandlers[2] = fixAngle;
     }
 
-    private function doHighlightSegment(e)
+    private function highlightSegment(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -128,7 +112,7 @@
       }
     }
 
-    private function doMoveArrow(e:MouseEvent)
+    private function moveArrow(e:MouseEvent)
     {
       var p:Point;
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
@@ -139,7 +123,7 @@
       arrowCoordinates = p;
     }
 
-    private function doRotateArrow(e:MouseEvent)
+    private function rotateArrow(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       parent1.removeChild(arrow);
@@ -162,22 +146,7 @@
         this.isTail = true;
     }
 
-    private function onMouseDown(e:MouseEvent)
-    {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doSelectSegment(e);
-          break;
-        case SELECT_POSITION:
-          doSelectPosition();
-          break;
-        case SELECT_ANGLE:
-          doSelectAngle();
-      }
-    }
-
-    private function doSelectSegment(e:MouseEvent)
+    private function selectSegment(e:MouseEvent)
     {
       var angle:Number;
       var p:Point;
@@ -186,7 +155,9 @@
       {
         p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
         angle = CoordinateTransformation.decartToPolar(p).y;
-        doNow = SELECT_POSITION;
+        
+        nextHandlers();
+        
         highlightedSegment.setColor(0x0);
         positionOfArrow = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
         arrow = new Arrow(positionOfArrow, angle, new Point(e.stageX, e.stageY), false, 0);
@@ -197,11 +168,13 @@
       }
     }
 
-    private function doSelectPosition()
+    private function fixPosition()
     {
       panel = new ConcentratedForcePanel();
       panel.x = 800 - 245;
-      doNow = SELECT_ANGLE;
+      
+      nextHandlers();
+      
       panel.setSegmentPoints(highlightedSegment.firstPointNumber,
                    highlightedSegment.firstDecartCoord,
                    highlightedSegment.secondPointNumber,
@@ -210,12 +183,13 @@
       parent1.addChild(panel);
     }
 
-    private function doSelectAngle()
+    private function fixAngle()
     {
       // убираем всех прослушивателей событий
       panel.removeEventListener(ConcentratedForcePanel.CHANGE_STATE, onChangePanel);
-      parent1.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      
+      releaseEvents();
+      
       anglePoints = panel.pointsOfAngle;
       panel.destroy();
       parent1.removeChild(panel);
@@ -236,43 +210,49 @@
       {
         angleValue = "0";
       }
+      
+      initDialog();
+    }
+    
+    private function initDialog()
+    {
       dialogWnd = new EditWindow3("","","",angleValue);
       parent1.addChild(dialogWnd);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-
-    private function onEndEditInDialogWindow(e:Event)
+    
+    private function releaseDialog()
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
+      dialogWnd.removeEventListener(DialogEvent.END_DIALOG, onEndDialog);
+      
       parent1.removeChild(dialogWnd);
       parent1.removeChild(arrow);
-
-      forceName = dialogWnd.force;
-      forceValue = dialogWnd.value;
-      angleName = dialogWnd.angleName;
-      angleValue = dialogWnd.angle;
-      dimension = dialogWnd.dimension;
       dialogWnd = null;
-      doCreateConcentratedForce();
-      dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
-    private function doCreateConcentratedForce()
+    private function onEndDialog(e:DialogEvent)
+    {
+      releaseDialog();
+      
+      if(e.canceled)
+        creationCancel();
+      else
+        createForce(e.eventData);
+    }
+
+    private function createForce(data:Object)
     {
       var p:Point;
       var angle:Number;
-      force = new ConcentratedForce(parent1, button_up, button_over, button_down, button_hit, forceName, angleName);
+      force = new ConcentratedForce(parent1, button_up, button_over, button_down, button_hit, data.forceName, data.angleName);
 
-      force.dimension = dimension;
+      force.units = data.units;
       force.segment = highlightedSegment;
       force.forceNumber = forceNumber;
-      force.angleValue = angleValue;
-      force.forceValue = forceValue;
+      force.angleValue = data.angleValue;
+      force.forceValue = data.forceValue;
       force.angleSign = arrow.angleSign;
       force.anglePoints = this.anglePoints;
 
@@ -287,17 +267,12 @@
       force.setCoordOfAngleName(p);
       force.x = arrowCoordinates.x;
       force.y = arrowCoordinates.y;
+      
+      dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
-    private function onCancelEditInDialogWindow(e:Event)
+    private function creationCancel()
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(arrow);
-
-      dialogWnd = null;
       dispatchEvent(new Event(ConcentratedForceCreator.CREATE_CANCEL));
     }
 

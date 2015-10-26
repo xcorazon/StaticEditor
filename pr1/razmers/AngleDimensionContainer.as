@@ -1,25 +1,19 @@
 ﻿package  pr1.razmers
 {
-  import flash.display.SimpleButton;
-  import flash.display.Sprite;
   import flash.display.DisplayObject;
   import flash.events.MouseEvent;
   import flash.geom.Point;
   import flash.events.Event;
   import pr1.windows.EditWindowAngle;
-  import pr1.windows.EditWindow;
-  import pr1.Shapes.Segment;
   import pr1.Shapes.Designation;
-  import pr1.Shapes.AngleDimension;
-  import pr1.ComConst;
   import pr1.CoordinateTransformation;
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
+  import pr1.forces.Element;
 
 
-  public class AngleDimensionContainer extends Sprite
+  public class AngleDimensionContainer extends Element
   {
-
-    private var razmerName1:String;
-    private var razmerValue1:String;
     public var firstPointNumber:int;
     public var secondPointNumber:int;
     public var thirdPointNumber:int;
@@ -30,68 +24,36 @@
     public var isInnerAngle:Boolean;
     public var razmerSign:int;
 
-    private var button:SimpleButton;
-    private var dialogWnd:EditWindowAngle;
-
-    private var razmerSignature:Designation = null;
-    private var razmerSignatureCoord:Point;
-    private var parent1:*;
-
-    public var mustBeDeleted:Boolean = false;
-
-    public function AngleDimensionContainer(parent:*, upState:DisplayObject = null,
+    public function AngleDimensionContainer(frame:Frame, upState:DisplayObject = null,
                  overState:DisplayObject = null,
                  downState:DisplayObject = null,
                  hitTestState:DisplayObject = null,
                  razmerName:String = null)
     {
-      super();
-      parent1 = parent;
-      button = new SimpleButton(upState, overState, downState, hitTestState);
-      addChild(button);
-      this.razmerName = razmerName;
-      razmerSignature.disable();
+      super(frame, upState, overState, upState, hitTestState);
 
-      button.addEventListener(MouseEvent.CLICK, onMouseClick);
+      params.name = razmerName;
+      this.razmerName = razmerName;
+      signatures.name.disable();
     }
 
     private function onMouseClick(e:MouseEvent)
     {
-      razmerSignatureCoord = new Point(razmerSignature.x, razmerSignature.y);
+      sigPoses.name = new Point(signatures.name.x, signatures.name.y);
 
-      dialogWnd = new EditWindowAngle(razmerValue1, razmerName1);
+      dialogWnd = new EditWindowAngle(params.value, params.name);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
       parent1.addChild(dialogWnd);
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    private function onEndDialog(e:Event)
+    override protected function changeValues(data:Object)
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      razmerName = dialogWnd.razmer;
-      razmerValue = dialogWnd.value;
-      setCoordOfRazmerName();
-      dialogWnd = null;
-      dispatchEvent(new Event(ComConst.CHANGE_ELEMENT, true));
+      razmerName  = data.name;
+      razmerValue = data.value;
     }
-
-    private function onCancelDialog(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      dialogWnd = null;
-      mustBeDeleted = true;
-      dispatchEvent(new Event(ComConst.DELETE_ELEMENT, true));
-    }
-
-
+    
     public function setCoordOfRazmerName()
     {
       var startAngle:Number;
@@ -115,62 +77,51 @@
       trace("Конечный угол: ", endAngle * 180/Math.PI);
       trace("Радиус: ", R);*/
       var positionOfSignature:Point = CoordinateTransformation.rotate( new Point(R,0), (startAngle + endAngle)/2);
-      positionOfSignature.x = positionOfSignature.x - razmerSignature.width/2;
-      positionOfSignature.y = positionOfSignature.y + razmerSignature.height/2;
+      positionOfSignature.x = positionOfSignature.x - signatures.name.width/2;
+      positionOfSignature.y = positionOfSignature.y + signatures.name.height/2;
       positionOfSignature = CoordinateTransformation.localToScreen(positionOfSignature, new Point(0,0), 0);
 
-      razmerSignature.x = positionOfSignature.x;
-      razmerSignature.y = positionOfSignature.y;
+      signatures.name.x = positionOfSignature.x;
+      signatures.name.y = positionOfSignature.y;
     }
 
     public function set razmerValue(value:String)
     {
-      razmerValue1 = value;
+      params.value = value;
     }
 
     public function get razmerValue():String
     {
-      return razmerValue1;
+      return params.value;
     }
 
 
     public function set razmerName(value:String)
     {
-      razmerName1 = value;
-      if(razmerSignature == null)
+      params.name = value;
+      if(signatures.name == null)
       {
-        razmerSignature = new Designation(razmerName1, "Symbol1");
+        signatures.name = new Designation(params.name, "Symbol1");
       }
       else
       {
-        removeChild(razmerSignature);
-        razmerSignature.destroy();
-        razmerSignature = new Designation(razmerName1, "Symbol1");
+        removeChild(signatures.name);
+        signatures.name.destroy();
+        signatures.name = new Designation(params.name, "Symbol1");
       }
-      addChild(razmerSignature);
+      addChild(signatures.name);
     }
 
     public function get razmerName():String
     {
-      return razmerName1;
+      return params.name;
     }
 
-    public function lock()
-    {
-      button.hitTestState = null;
-      razmerSignature.disable();
-    }
-
-    public function unlock()
+    override public function unlock()
     {
       button.hitTestState = button.upState;
-      razmerSignature.disable();
+      signatures.name.disable();
     }
 
-    public function destroy()
-    {
-      button.removeEventListener(MouseEvent.CLICK, onMouseClick);
-      razmerSignature.destroy();
-    }
   }
 }

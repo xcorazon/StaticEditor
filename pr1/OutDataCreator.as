@@ -207,7 +207,7 @@
 				f.@num2 = p.forceNumber2;
 				f.@name = p.forceName;
 				f.@value = p.forceValue;
-				f.@dimension = p.dimension;
+				f.@dimension = p.units;
 				f.@angle = p.angleValue;
 				
 				outData.drForcesList.appendChild(f);
@@ -221,7 +221,7 @@
 				f.@num2 = p.forceNumber2;
 				f.@name = p.forceName;
 				f.@value = p.forceValue;
-				f.@dimension = p.dimension;
+				f.@dimension = p.units;
 				f.@angle = p.angleValue;
 				
 				outData.dtForcesList.appendChild(f);
@@ -253,7 +253,7 @@
 				
 				var point_id:XML;
 				
-				if(d.razmerType == LinearDimensionContainer.FREE_DIMENSION){
+				if(d.razmerType == LinearDimensionYContainer.FREE_DIMENSION){
 					for each ( var element:XML in outData.pointsList.elements()){
 						var a = element.@x.toString();
 						var b = element.@y.toString();
@@ -272,7 +272,7 @@
 					razmer.appendChild(secondPoints);
 				}
 				
-				if(d.razmerType == LinearDimensionContainer.HORISONTAL_DIMENSION){
+				if(d.razmerType == LinearDimensionYContainer.HORISONTAL_DIMENSION){
 					for each ( element in outData.pointsList.elements()){
 						a = element.@x.toString();
 						if(a == d.firstPointDecartCoord.x.toFixed(0) ){
@@ -288,7 +288,7 @@
 					razmer.appendChild(secondPoints);
 				}
 				
-				if(d.razmerType == LinearDimensionContainer.VERTICAL_DIMENSION){
+				if(d.razmerType == LinearDimensionYContainer.VERTICAL_DIMENSION){
 					for each ( element in outData.pointsList.elements()){
 						a = element.@y.toString();
 						if(a == d.firstPointDecartCoord.y.toFixed(0) ){

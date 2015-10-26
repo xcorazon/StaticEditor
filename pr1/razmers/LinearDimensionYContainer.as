@@ -17,91 +17,53 @@
   import flash.display.BitmapData;
   import flash.geom.Matrix;
   import flash.text.Font;
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
+  import pr1.forces.Element;
 
-  public class LinearDimensionYContainer extends Sprite
+  public class LinearDimensionYContainer extends Element
   {
     public static const FREE_DIMENSION:int = 0;
     public static const HORISONTAL_DIMENSION:int = 1;
     public static const VERTICAL_DIMENSION:int = 2;
 
-    private var razmerName1:String;
-    public var razmerValue1:String;
-    private var dimension1:String;
     public var firstPointDecartCoord:Point;
     public var secondPointDecartCoord:Point;
     public var firstPointScreenCoord:Point;
     public var secondPointScreenCoord:Point;
     public var razmerHeight:Number;
-    //public var firstPointNumber:int;
-    //public var secondPointNumber:int;
 
-    private var button:SimpleButton;
-    private var dialogWnd:EditWindow4;
 
-    private var razmerSignature:Designation = null;
-    private var razmerSignatureCoord:Point;
-    private var razmerSignatureAngle:Number;
-    private var razmerSignatureView:Bitmap;
-    private var parent1:*;
-    private var timesFont:Font;
-
-    public var mustBeDeleted:Boolean = false;
-
-    public function LinearDimensionYContainer(parent:*, upState:DisplayObject = null,
+    public function LinearDimensionYContainer(frame:Frame, upState:DisplayObject = null,
                  overState:DisplayObject = null,
                  downState:DisplayObject = null,
                  hitTestState:DisplayObject = null,
                  razmerName:String = null)
     {
-      super();
-      timesFont = new Times1();
-      parent1 = parent;
-      button = new SimpleButton(upState, overState, downState, hitTestState);
-      addChild(button);
-      this.razmerName = razmerName;
-      razmerSignature.disable();
+      super(frame, upState, overState, downState, hitTestState);
 
-      button.addEventListener(MouseEvent.CLICK, onMouseClick);
+      this.razmerName = razmerName;
+      signatures.name.disable();
     }
 
     private function onMouseClick(e:MouseEvent)
     {
-      razmerSignatureCoord = new Point(razmerSignature.x, razmerSignature.y);
+      sigPoses.name = new Point(signatures.name.x, signatures.name.y);
 
-      dialogWnd = new EditWindow4(razmerValue1, razmerName1);
-      dialogWnd.dimension = dimension1;
+      dialogWnd = new EditWindow4(params.value, params.name);
+      dialogWnd.units = params.units;
       dialogWnd.x = 400;
       dialogWnd.y = 300;
       parent1.addChild(dialogWnd);
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    private function onEndDialog(e:Event)
+    override protected function changeValues(data:Object)
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      razmerName = dialogWnd.razmer;
-      razmerValue = dialogWnd.value;
-      dimension = dialogWnd.dimension;
-      setCoordOfRazmerName();
-      dialogWnd = null;
-      dispatchEvent(new Event(ComConst.CHANGE_ELEMENT, true));
+      razmerName  = data.name;
+      razmerValue = data.value;
+      units       = data.units;
     }
-
-    private function onCancelDialog(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      dialogWnd = null;
-      mustBeDeleted = true;
-      dispatchEvent(new Event(ComConst.DELETE_ELEMENT, true));
-    }
-
 
     public function setCoordOfRazmerName()
     {
@@ -109,26 +71,23 @@
       var width = secondPointDecartCoord.y - firstPointDecartCoord.y;
       var p1:Point = new Point();
 
-      p1.x = (width - razmerSignature.width)/2;
-      p1.y = razmerHeight + (razmerSignature.height - 5);
+      p1.x = (width - signatures.name.width)/2;
+      p1.y = razmerHeight + (signatures.name.height - 5);
       p1 = CoordinateTransformation.localToScreen(p1, new Point(0,0), angle);
-      razmerSignature.rotation = -angle*180/Math.PI;
-      //razmerSignatureView.rotation = -angle*180/Math.PI;
-
-      /*razmerSignatureView.x = p1.x;
-      razmerSignatureView.y = p1.y;*/
-      razmerSignature.x = p1.x;
-      razmerSignature.y = p1.y;
+      signatures.name.rotation = -angle*180/Math.PI;
+      
+      signatures.name.x = p1.x;
+      signatures.name.y = p1.y;
     }
 
     public function set razmerValue(value:String)
     {
-      razmerValue1 = value;
+      params.value = value;
     }
 
     public function get razmerValue():String
     {
-      return razmerValue1;
+      return params.value;
     }
 
 
@@ -141,44 +100,34 @@
       var m:Matrix = new Matrix();
       m.scale(4, 4);
 
-      razmerName1 = value;
-      if(razmerSignature == null)
+      params.name = value;
+      if(signatures.name == null)
       {
-        razmerSignature = new Designation(razmerName1, timesFont.fontName/*"Times New Roman"*/);
+        signatures.name = new Designation(params.name, timesFont.fontName/*"Times New Roman"*/);
       }
       else
       {
-        //removeChild(razmerSignatureView);
-        removeChild(razmerSignature);
-        razmerSignature = new Designation(razmerName1, timesFont.fontName/*"Times New Roman"*/);
+        removeChild(signatures.name);
+        signatures.name = new Designation(params.name, timesFont.fontName/*"Times New Roman"*/);
       }
 
-      /*w = razmerSignature.width * 4;
-      h = razmerSignature.height * 4;
-      bmp1 = new BitmapData(w, h, true, 0x00ffffff);
-
-      bmp1.draw(razmerSignature, m, null, null, null, true);
-      razmerSignatureView = new Bitmap(bmp1);
-      razmerSignatureView.scaleX = 0.25;
-      razmerSignatureView.scaleY = 0.25;
-      addChild(razmerSignatureView);*/
-      addChild(razmerSignature);
+      addChild(signatures.name);
 
     }
 
     public function get razmerName():String
     {
-      return razmerName1;
+      return params.name;
     }
 
-    public function set dimension(dim:String)
+    public function set units(dim:String)
     {
-      dimension1 = dim;
+      params.units = dim;
     }
 
-    public function get dimension():String
+    public function get units():String
     {
-      return dimension1;
+      return params.units;
     }
 
     // горизонтальный, вертикальный, свободный размер
@@ -187,22 +136,10 @@
       return VERTICAL_DIMENSION;
     }
 
-    public function lock()
-    {
-      button.hitTestState = null;
-      razmerSignature.disable();
-    }
-
-    public function unlock()
+    override public function unlock()
     {
       button.hitTestState = button.upState;
-      razmerSignature.disable();
-    }
-
-    public function destroy()
-    {
-      button.removeEventListener(MouseEvent.CLICK, onMouseClick);
-      razmerSignature.destroy();
+      signatures.name.disable();
     }
   }
 }

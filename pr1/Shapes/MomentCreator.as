@@ -45,8 +45,6 @@
     //cам элемент нагрузки в полном виде
     private var moment:Moment = null;
 
-    private var dialogWnd:EditWindowMoment;
-
 
     public function MomentCreator(frame:Frame)
     {
@@ -58,6 +56,7 @@
 
       initHandlers();
       initEvents();
+      
     }
 
     private function initHandlers()
@@ -197,7 +196,7 @@
     
     private function releaseDialog()
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
+      dialogWnd.removeEventListener(DialogEvent.END_DIALOG, onEndDialog);
       
       parent1.removeChild(dialogWnd);
       parent1.removeChild(arrow);

@@ -2,6 +2,7 @@ package pr1.Shapes
 {
   import flash.display.Sprite;
   import flash.events.MouseEvent;
+  import pr1.window.EditWindow;
   import pr1.Frame;
 
   public class Creator extends Sprite
@@ -14,7 +15,8 @@ package pr1.Shapes
 
     private var _moveIndex:int;
     private var _downIndex:int;
-
+    
+    private var dialogWnd:EditWindow;
 
 
     public function Creator(frame:Frame)
@@ -22,6 +24,9 @@ package pr1.Shapes
       moveHandlers = new Array();
       downHandlers = new Array();
       this.parent1 = frame.parent1;
+      
+      moveIndex = 0;
+      downIndex = 0;
     }
 
 

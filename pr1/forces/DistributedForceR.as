@@ -12,186 +12,127 @@
   import pr1.Shapes.Designation;
   import pr1.ComConst;
   import flash.text.Font;
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
+  import pr1.forces.Element;
 
 
-  public class DistributedForceR extends Sprite
+  public class DistributedForceR extends Element
   {
-
-    public var angleValue:String;   // +90 или -90 градусов
-    private var ownerSegmentOfForce:Segment;
-    private var forceName1:String;
-    private var forceValue1:String;
-    private var dimension1:String;
     public var forceNumber1:int;
     public var forceNumber2:int;
-    private var firstScreenCoord1:Point;
-    private var secondScreenCoord1:Point;
 
-    private var button:SimpleButton;
-    private var dialogWnd:EditWindowQ;
-
-    private var forceSignature:Designation = null;
-    private var forceSignatureCoord:Point;
-    private var parent1:*;
-    private var timesFont:Font;
-
-    public var mustBeDeleted:Boolean = false;
-
-    public function DistributedForceR(parent:*, upState:DisplayObject = null,
+    public function DistributedForceR(frame:Frame, upState:DisplayObject = null,
                  overState:DisplayObject = null,
                  downState:DisplayObject = null,
                  hitTestState:DisplayObject = null,
                  forceName:String = null)
     {
-      super();
-      timesFont = new Times1();
-      parent1 = parent;
-      button = new SimpleButton(upState, overState, downState, hitTestState);
-      addChild(button);
+      super(frame, upState, overState, downState, hitTestState);
+      
       this.forceName = forceName;
       firstScreenCoord = new Point(0,0);
       secondScreenCoord = new Point(0,0);
-
-      button.addEventListener(MouseEvent.CLICK, onMouseClick);
-
     }
 
     private function onMouseClick(e:MouseEvent)
     {
       dispatchEvent( new Event(ComConst.LOCK_ALL, true));
-      forceSignatureCoord = new Point(forceSignature.x, forceSignature.y);
+      sigPoses.name = new Point(signatures.name.x, signatures.name.y);
 
-      dialogWnd = new EditWindowQ(forceValue1, forceName1);
-      dialogWnd.dimension = dimension1;
+      dialogWnd = new EditWindowQ(params.value, params.name);
+      dialogWnd.units = params.units;
       dialogWnd.x = 400;
       dialogWnd.y = 300;
       parent1.addChild(dialogWnd);
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-
-    private function onEndDialog(e:Event)
+    
+    override protected function changeValues(data:Object)
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      forceName = dialogWnd.force;
-      forceValue = dialogWnd.value;
-      dimension = dialogWnd.dimension;
-      dialogWnd = null;
-      dispatchEvent(new Event(ComConst.CHANGE_ELEMENT, true));
+      forceName  = data.forceName;
+      forceValue = data.forceValue;
+      units      = data.units;
     }
-
-    private function onCancelDialog(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      dialogWnd = null;
-      mustBeDeleted = true;
-      dispatchEvent(new Event(ComConst.DELETE_ELEMENT, true));
-    }
-
 
     public function setCoordOfForceName(p:Point)
     {
-      forceSignature.x = p.x;
-      forceSignature.y = p.y;
-      forceSignatureCoord = p.clone();
+      signatures.name.x = p.x;
+      signatures.name.y = p.y;
+      sigPoses.name = p.clone();
     }
 
     public function set forceValue(value:String)
     {
-      forceValue1 = value;
+      params.value = value;
     }
 
     public function get forceValue():String
     {
-      return forceValue1;
+      return params.value;
     }
-
 
     public function set forceName(value:String)
     {
-      forceName1 = value;
-      if(forceSignature == null)
+      params.name = value;
+      if(signatures.name == null)
       {
-        forceSignature = new Designation(forceName1, timesFont.fontName/*"Times New Roman"*/);
-        addChild(forceSignature);
+        signatures.name = new Designation(params.name, timesFont.fontName/*"Times New Roman"*/);
+        addChild(signatures.name);
       }
       else
       {
-        removeChild(forceSignature);
-        forceSignature = new Designation(forceName1, timesFont.fontName/*"Times New Roman"*/);
-        addChild(forceSignature);
-        forceSignature.x = forceSignatureCoord.x;
-        forceSignature.y = forceSignatureCoord.y;
+        removeChild(signatures.name);
+        signatures.name = new Designation(params.name, timesFont.fontName/*"Times New Roman"*/);
+        addChild(signatures.name);
+        signatures.name.x = sigPoses.name.x;
+        signatures.name.y = sigPoses.name.y;
       }
     }
 
     public function get forceName():String
     {
-      return forceName1;
+      return params.name;
     }
 
-    public function set segment(seg:Segment)
+    public function set units(dim:String)
     {
-      ownerSegmentOfForce = seg;
+      params.units = dim;
     }
 
-    public function get segment():Segment
+    public function get units():String
     {
-      return ownerSegmentOfForce;
-    }
-
-    public function set dimension(dim:String)
-    {
-      dimension1 = dim;
-    }
-
-    public function get dimension():String
-    {
-      return dimension1;
+      return params.units;
     }
 
     public function set firstScreenCoord(p:Point)
     {
-      firstScreenCoord1 = p.clone();
+      params.firstScrPt = p.clone();
     }
 
     public function get firstScreenCoord():Point
     {
-      return firstScreenCoord1.clone();
+      return params.firstScrPt.clone();
     }
 
     public function set secondScreenCoord(p:Point)
     {
-      secondScreenCoord1 = p;
+      params.secondScrPt = p.clone();
     }
 
     public function get secondScreenCoord():Point
     {
-      return secondScreenCoord1.clone();
+      return params.secondScrPt.clone();
     }
-
-    public function lock()
+    
+    public function get angleValue():String
     {
-      button.hitTestState = null;
-      forceSignature.disable();
+      return params.angle;
     }
-
-    public function unlock()
+    
+    public function set angleValue(ang:String):String
     {
-      button.hitTestState = button.upState;
-      forceSignature.enable();
-    }
-
-    public function destroy()
-    {
-      button.removeEventListener(MouseEvent.CLICK, onMouseClick);
-      forceSignature.destroy();
+      params.angle = angle;
     }
   }
 }

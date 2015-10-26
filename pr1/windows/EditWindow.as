@@ -10,6 +10,11 @@ package pr1.windows
 
   public class EditWindow extends Sprite
   {
+  
+    public static const DELETE_FORCE:String = "Delete force";
+    public static const END_EDIT:String = "End Edit";
+    public static const CANCEL_EDIT:String = "Cancel Edit";
+    
     protected var backgrnd:MovieClip;
     // окно с ошибкой
     protected var errWindow:Sprite;
