@@ -1,64 +1,40 @@
 ﻿package  pr1.opora
 {
-  import flash.display.SimpleButton;
-  import flash.display.Sprite;
-  import flash.display.DisplayObject;
   import flash.events.MouseEvent;
   import flash.geom.Point;
-  import flash.events.Event;
   import pr1.windows.EditWindowSealing;
-  import pr1.windows.EditWindow;
   import pr1.Shapes.Designation;
-  import pr1.Shapes.AngleDimension;
-  import pr1.ComConst;
-  import pr1.CoordinateTransformation;
   import pr1.Shapes.Sealing;
   import flash.display.Shape;
   import pr1.Shapes.Arrow;
   import pr1.Shapes.ArcArrow;
-  import pr1.Shapes.Segment;
+  import pr1.forces.Element;
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
 
 
-  public class SealingContainer extends Sprite
+  public class SealingContainer extends Element
   {
 
     private var angleOfSealing:Number;
     public var pointNumber:int;
-    public var segment:Segment;
-    private var horisontalReaction1:String;
-    private var verticalReaction1:String;
-    private var moment1:String;
 
-    private var button:SimpleButton;
-    private var dialogWnd:EditWindowSealing;
-
-    private var hReactionSignature:Designation = null;
-    private var hSignatureCoord:Point = null;
-    private var vReactionSignature:Designation = null;
-    private var vSignatureCoord:Point = null;
-    private var momentSignature:Designation = null;
-    private var momentCoord:Point = null;
-    private var parent1:*;
-    private var tempHitTestState:Shape;
-
-    public var mustBeDeleted:Boolean = false;
-
-    public function SealingContainer(parent:*, angle)
+    public function SealingContainer(frame:Frame, angle)
     {
-      super();
-      parent1 = parent;
+      
       var upState:Sealing = new Sealing();
-      upState.rotation = angle;
       var overState:Sealing = new Sealing(0xff);
-      overState.rotation = angle;
       var hitTestState:Shape = new Shape();
+      
+      upState.rotation = angle;
+      overState.rotation = angle;
+      
       hitTestState.graphics.beginFill(0xffffff);
       hitTestState.graphics.drawRect(-10,-40,10,80);
       hitTestState.graphics.endFill();
       hitTestState.rotation = angle;
-      tempHitTestState = hitTestState;
-      button = new SimpleButton(upState, overState, upState, hitTestState);
-      addChild(button);
+      
+      super(frame, upState, overState, upState, hitTestState);
 
       var hArrow:Arrow = new Arrow(new Point(0,0), 0, new Point(5,0), false, 0xCC0000);
       var vArrow:Arrow = new Arrow(new Point(0,0), 0, new Point(0,-5), false, 0xCC0000);
@@ -67,150 +43,107 @@
       addChild(vArrow);
       addChild(moment);
 
-      hSignatureCoord = new Point(50,0);
-      vSignatureCoord = new Point(-0,-70);
-      momentCoord = new Point(-35, 35);
+      sigPoses.hReaction = new Point(50,0);
+      sigPoses.vReaction = new Point(-0,-70);
+      sigPoses.moment = new Point(-35, 35);
 
-
-      button.addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
     private function onMouseClick(e:MouseEvent)
     {
-      hSignatureCoord = new Point(hReactionSignature.x, hReactionSignature.y);
-      vSignatureCoord = new Point(vReactionSignature.x, vReactionSignature.y);
-      momentCoord = new Point(momentSignature.x, momentSignature.y);
+      sigPoses.hReaction = new Point(signatures.hReaction.x, signatures.hReaction.y);
+      sigPoses.vReaction = new Point(signatures.vReaction.x, signatures.vReaction.y);
+      sigPoses.moment = new Point(signatures.moment.x, signatures.moment.y);
 
       dialogWnd = new EditWindowSealing(horisontalReaction, verticalReaction, moment);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
       parent1.addChild(dialogWnd);
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    private function onEndDialog(e:Event)
+    
+    override protected function changeValues(data:Object)
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      horisontalReaction = dialogWnd.horizontalReaction;
-      verticalReaction = dialogWnd.verticalReaction;
-      moment = dialogWnd.moment;
-
+      horisontalReaction = data.hReaction;
+      verticalReaction   = data.vReaction;
+      moment             = data.moment;
+      
       setCoordOfSignatures();
-      dialogWnd = null;
-      dispatchEvent(new Event(ComConst.CHANGE_ELEMENT, true));
-    }
-
-    private function onCancelDialog(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndDialog);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelDialog);
-
-      parent1.removeChild(dialogWnd);
-      dialogWnd = null;
-      mustBeDeleted = true;
-      dispatchEvent(new Event(ComConst.DELETE_ELEMENT, true));
     }
 
 
     public function setCoordOfSignatures()
     {
-      hReactionSignature.x = hSignatureCoord.x;
-      hReactionSignature.y = hSignatureCoord.y;
-      vReactionSignature.x = vSignatureCoord.x;
-      vReactionSignature.y = vSignatureCoord.y;
-      momentSignature.x = momentCoord.x;
-      momentSignature.y = momentCoord.y;
+      signatures.hReaction.x = sigPoses.hReaction.x;
+      signatures.hReaction.y = sigPoses.hReaction.y;
+      signatures.vReaction.x = sigPoses.vReaction.x;
+      signatures.vReaction.y = sigPoses.vReaction.y;
+      signatures.moment.x = sigPoses.moment.x;
+      signatures.moment.y = sigPoses.moment.y;
     }
 
     public function set horisontalReaction(value:String)
     {
-      horisontalReaction1 = value;
-      if(hReactionSignature == null)
+      params.hReaction = value;
+      if(signatures.hReaction == null)
       {
-        hReactionSignature = new Designation(horisontalReaction1, "Times New Roman");
+        signatures.hReaction = new Designation(params.hReaction, "Times New Roman");
       }
       else
       {
-        removeChild(hReactionSignature);
-        hReactionSignature.destroy();
-        hReactionSignature = new Designation(horisontalReaction1, "Times New Roman");
+        removeChild(signatures.hReaction);
+        signatures.hReaction.destroy();
+        signatures.hReaction = new Designation(params.hReaction, "Times New Roman");
       }
-      addChild(hReactionSignature);
+      addChild(signatures.hReaction);
     }
 
     public function get horisontalReaction():String
     {
-      return horisontalReaction1;
+      return params.hReaction;
     }
 
     public function set verticalReaction(value:String)
     {
-      verticalReaction1 = value;
-      if(vReactionSignature == null)
+      params.vReaction = value;
+      if(signatures.vReaction == null)
       {
-        vReactionSignature = new Designation(verticalReaction1, "Times New Roman");
+        signatures.vReaction = new Designation(params.vReaction, "Times New Roman");
       }
       else
       {
-        removeChild(vReactionSignature);
-        vReactionSignature.destroy();
-        vReactionSignature = new Designation(verticalReaction1, "Times New Roman");
+        removeChild(signatures.vReaction);
+        signatures.vReaction.destroy();
+        signatures.vReaction = new Designation(params.vReaction, "Times New Roman");
       }
-      addChild(vReactionSignature);
+      addChild(signatures.vReaction);
     }
 
     public function get verticalReaction():String
     {
-      return verticalReaction1;
+      return params.vReaction;
     }
 
     public function set moment(value:String)
     {
-      moment1 = value;
-      if(momentSignature == null)
+      params.moment = value;
+      if(signatures.moment == null)
       {
-        momentSignature = new Designation(moment1, "Times New Roman");
+        signatures.moment = new Designation(params.moment, "Times New Roman");
       }
       else
       {
-        removeChild(momentSignature);
-        momentSignature.destroy();
-        momentSignature = new Designation(moment1, "Times New Roman");
+        removeChild(signatures.moment);
+        signatures.moment.destroy();
+        signatures.moment = new Designation(params.moment, "Times New Roman");
       }
-      addChild(momentSignature);
+      addChild(signatures.moment);
     }
 
     public function get moment():String
     {
-      return moment1;
-    }
-
-    public function lock()
-    {
-      button.hitTestState = null;
-      momentSignature.disable();
-      vReactionSignature.disable();
-      hReactionSignature.disable();
-    }
-
-    public function unlock()
-    {
-      button.hitTestState = tempHitTestState;
-      momentSignature.enable();
-      vReactionSignature.enable();
-      hReactionSignature.enable();
-    }
-
-    public function destroy()
-    {
-      button.removeEventListener(MouseEvent.CLICK, onMouseClick);
-      vReactionSignature.destroy();
-      hReactionSignature.destroy();
-      momentSignature.destroy();
+      return params.moment;
     }
   }
 }

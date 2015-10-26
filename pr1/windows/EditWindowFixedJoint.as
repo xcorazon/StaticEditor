@@ -4,30 +4,22 @@ package pr1.windows
 {
   import flash.display.*;
   import pr1.windows.EditWindow;
-  import pr1.EditEvent1;
   import flash.events.*;
   import flash.text.*;
 
-  public class EditWindowFixedJoint extends Sprite
+  public class EditWindowFixedJoint extends EditWindow
   {
-    public static const DELETE_OBJECT:String = "Delete object";
-    //текстовые поля для ввода информации
-    private var hReaction:TextField;
-    private var vReaction:TextField;
-    // фоновое изображение окна
-    internal var backgrnd:MovieClip;
-    // окно с ошибкой
-    private var errWindow:Sprite;
-
-    //кнопки
-    internal var okButton:SimpleButton;
-    internal var cancelButton:SimpleButton;
-
+  
     public function EditWindowFixedJoint(horisontalReaction:String, verticalReaction:String)
     {
+      super();
+      removeChild(_children.forceValue);
+      removeChild(_children.forceName);
+      delete _children["forceValue"];
+      delete _children["forceName"];
+      
       var txtFormat:TextFormat = new TextFormat("Arial", 12, 0x0, true);
-      addBackground();
-      hReaction = new TextField();
+      var hReaction:TextField = new TextField();
       hReaction.x = 160;
       hReaction.y = -51.5;
       hReaction.width = 45;
@@ -40,10 +32,11 @@ package pr1.windows
       hReaction.maxChars = 5;
       hReaction.defaultTextFormat = txtFormat;
       addChild(hReaction);
+      _children.hReaction = hReaction;
       if(horisontalReaction != null)
         hReaction.text = horisontalReaction;
 
-      vReaction = new TextField();
+      var vReaction:TextField = new TextField();
       vReaction.x = 160;
       vReaction.y = -8.8;
       vReaction.width = 45;
@@ -55,86 +48,31 @@ package pr1.windows
       vReaction.restrict = "A-Za-z0-9_";
       vReaction.multiline = false;
       addChild(vReaction);
+      _children.vReaction = vReaction;
       if(verticalReaction != "")
         vReaction.text = String(verticalReaction);
 
-      okButton = new OkButton();
-      okButton.x = 30;
-      okButton.y = 50;
-      okButton.width = 40;
-      okButton.height = 29;
-      addChild(okButton);
-
-      cancelButton = new CancelButton();
-      cancelButton.x = 100;
-      cancelButton.y = 50;
-      cancelButton.width = 62;
-      cancelButton.height = 29;
-      addChild(cancelButton);
-
-      errWindow = new ErrorDialog();
-      errWindow.x = -65;
-      errWindow.y = -35;
-
-      okButton.addEventListener(MouseEvent.CLICK, okListener);
-      cancelButton.addEventListener(MouseEvent.CLICK, cancelListener);
-
-      //error_ok_button.addEventListener(MouseEvent.CLICK, errorListener);
     }
 
-    internal function addBackground():void
+    override protected function addBackground():void
     {
       backgrnd = new FixedJointDialog();
       backgrnd.stop();
       addChild(backgrnd);
     }
 
-    public function okListener(e:MouseEvent)
+    override protected function fieldsEmpty():Boolean
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
-
-      if(hReaction.length == 0 || vReaction.length == 0)
-      {
-        // вывести окно с повтором ввода
-        trace("forceName ",hReaction.text," forceValue ",vReaction.text);
-        errWindow.addEventListener("EndError", errorListener);
-        addChild(errWindow);
-      }
-      else
-      {
-        // послать сообщение об окончании ввода
-        dispatchEvent(new Event(EditWindow.END_EDIT));
-      }
+      return _children.hReaction.length == 0 || _children.vReaction.length == 0;
     }
-
-    public function cancelListener(e:MouseEvent)
+    
+    override protected function setEventData():Object
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
-      hReaction.text = "";
-      vReaction.text = "";
-
-      dispatchEvent(new Event(EditWindow.CANCEL_EDIT));
-
-    }
-
-    public function errorListener(e:Event)
-    {
-      errWindow.removeEventListener("EndError", errorListener);
-      okButton.addEventListener(MouseEvent.CLICK, okListener);
-      cancelButton.addEventListener(MouseEvent.CLICK, cancelListener);
-      removeChild(errWindow);
-    }
-
-    public function get verticalReaction():String
-    {
-      return vReaction.text;
-    }
-
-    public function get horizontalReaction():String
-    {
-      return String(hReaction.text);
+      var data:Object = new Object();
+      data.hReaction = _children.hReaction.text;
+      data.cReaction = _children.vReaction.text;
+      
+      return data;
     }
   }
 }

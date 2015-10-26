@@ -22,7 +22,7 @@ package pr1.windows
     protected var okButton:SimpleButton;
     protected var cancelButton:SimpleButton;
 
-    public function EditWindow(value:String, name:String)
+    public function EditWindow(value:String = "", name:String = "")
     {
       var txtFormat:TextFormat = new TextFormat("Arial", 12, 0x0, true);
       addBackground();

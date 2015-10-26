@@ -20,6 +20,8 @@ package  pr1.forces
     protected var parent1:*;
     protected var button:SimpleButton;
     
+    protected var tempHitTestState:Shape;
+    
     protected var timesFont:Font;
     
     
@@ -33,6 +35,8 @@ package  pr1.forces
       
       button = new SimpleButton(upState, overState, downState, hitTestState);
       addChild(button);
+      
+      tempHitTestState = hitTestState;
       
       button.addEventListener(MouseEvent.CLICK, onMouseClick);
     }
@@ -77,7 +81,7 @@ package  pr1.forces
 
     public function unlock()
     {
-      button.hitTestState = button.upState;
+      button.hitTestState = tempHitTestState;
       for each (var sig in signatures)
         sig.enable();
     }
