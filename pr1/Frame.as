@@ -230,9 +230,9 @@
     private function createRDistributedForce(e:Event)
     {
       lockAllElements();
-      creator = new DistributedForceRCreator(parent1, segments, lastNonUsedDRForce);
-      creator.addEventListener(DistributedForceRCreator.CREATE_DONE, qrCreationDone);
-      creator.addEventListener(DistributedForceRCreator.CREATE_CANCEL, qrCreationCancel);
+      creator = new DistributedForceRCreator(this);
+      creator.addEventListener(Creator.CREATE_DONE, qrCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, qrCreationCancel);
     }
     private function qrCreationDone(e:Event)
     {
@@ -241,17 +241,17 @@
       distributedForcesR.push(creator.result);
       snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
       parent1.snap = snap1;
-      creator.removeEventListener(DistributedForceRCreator.CREATE_DONE, qrCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, qrCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(DistributedForceRCreator.CREATE_CANCEL, qrCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, qrCreationCancel);
       mainPanel.setButtonsActiveState();
       lastNonUsedDRForce += 2;
     }
     private function qrCreationCancel(e:Event)
     {
       unlockAllElements();
-      creator.removeEventListener(DistributedForceRCreator.CREATE_DONE, qrCreationDone);
-      creator.removeEventListener(DistributedForceRCreator.CREATE_CANCEL, qrCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, qrCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, qrCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 
@@ -270,17 +270,17 @@
       distributedForcesT.push(creator.result);
       snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
       parent1.snap = snap1;
-      creator.removeEventListener(DistributedForceRCreator.CREATE_DONE, qtCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, qtCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(DistributedForceRCreator.CREATE_CANCEL, qtCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, qtCreationCancel);
       mainPanel.setButtonsActiveState();
       lastNonUsedDTForce += 2;
     }
     private function qtCreationCancel(e:Event)
     {
       unlockAllElements();
-      creator.removeEventListener(DistributedForceRCreator.CREATE_DONE, qtCreationDone);
-      creator.removeEventListener(DistributedForceRCreator.CREATE_CANCEL, qtCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, qtCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, qtCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 
@@ -288,9 +288,9 @@
     private function createFreeDimension(e:Event)
     {
       lockAllElements();
-      creator = new LinearDimensionCreator(parent1, segments);
-      creator.addEventListener(LinearDimensionCreator.CREATE_DONE, freeDimensionCreationDone);
-      creator.addEventListener(LinearDimensionCreator.CREATE_CANCEL, freeDimensionCreationCancel);
+      creator = new LinearDimensionCreator(this);
+      creator.addEventListener(Creator.CREATE_DONE, freeDimensionCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, freeDimensionCreationCancel);
 
     }
     private function freeDimensionCreationDone(e:Event)
@@ -298,16 +298,16 @@
       unlockAllElements();
       updateLinearDimensions(creator.result);
       freeDimension.push(creator.result);
-      creator.removeEventListener(LinearDimensionCreator.CREATE_DONE, freeDimensionCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, freeDimensionCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(LinearDimensionCreator.CREATE_CANCEL, freeDimensionCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, freeDimensionCreationCancel);
       mainPanel.setButtonsActiveState();
     }
     private function freeDimensionCreationCancel(e:Event)
     {
       unlockAllElements();
-      creator.removeEventListener(LinearDimensionCreator.CREATE_DONE, freeDimensionCreationDone);
-      creator.removeEventListener(LinearDimensionCreator.CREATE_CANCEL, freeDimensionCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, freeDimensionCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, freeDimensionCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 

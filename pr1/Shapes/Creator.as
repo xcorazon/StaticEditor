@@ -3,7 +3,7 @@
   import flash.display.Sprite;
   import flash.events.MouseEvent;
   import flash.events.Event;
-  import pr1.window.EditWindow;
+  import pr1.windows.EditWindow;
   import pr1.Frame;
   import pr1.events.DialogEvent;
   import pr1.Snap;
@@ -12,8 +12,8 @@
 
   public class Creator extends Sprite
   {
-    public static const CREATE_CANCEL:String = "Cancel creation of moment";
-    public static const CREATE_DONE:String = "Done creation of moment";
+    public static const CREATE_CANCEL:String = "Cancel creation";
+    public static const CREATE_DONE:String = "Creation Done";
 
     // обработчики событий
     protected var moveHandlers:Array;

@@ -13,78 +13,54 @@
   import pr1.windows.EditWindow;
   import pr1.forces.DistributedForceR;
   import pr1.Snap;
+  import pr1.Frame;
 
-  public class DistributedForceRCreator extends Sprite
+  public class DistributedForceRCreator extends Creator
   {
-    // события в объекте
-    public static const CREATE_CANCEL:String = "Cancel creation of distributed force";
-    public static const CREATE_DONE:String = "Done creation of distributed force";
-    // константы для внутреннего использования
-    private static const SELECT_SEGMENT:int = 0;
-    private static const SELECT_POSITION:int = 1;
-    private static const SELECT_LENGTH_HEIGHT:int = 2;
-
-    private var parent1:*;
-    private var segments:Array;
     private var forceNumber1:int;
     private var forceNumber2:int;
     private var highlightedSegment:Segment;
-    private var snap:Snap;
 
-
-    // выходные данные
-    private var arrows:RectangularArrowsArray;
     private var arrowsHeight:Number;
     private var arrowsLength:Number;
     private var arrowsCoordinate1:Point;  // координаты стрелок на экране
     private var arrowsCoordinate2:Point;  // координаты стрелок на экране
-    private var forceName:String;
-    private var forceValue:String;
+    
     private var angleValue:String;
-    private var dimension:String;
 
     private var button_up:RectangularArrowsArray;
     private var button_over:RectangularArrowsArray;
     private var button_down:RectangularArrowsArray;
     private var button_hit:RectangularArrowsArray;
     //cам элемент нагрузки в полном виде
-    private var distributedForceR:DistributedForceR = null;
+    private var distributedForce:* = null;
 
-    private var dialogWnd:EditWindowQ;
 
-    private var doNow:int;
-
-    public function DistributedForceRCreator(parent:*, segments:Array, lastNonusedForceNumber:int)
+    public function DistributedForceRCreator(frame:Frame)
     {
-      // constructor code
-      this.parent1 = parent;
+      super(frame);
+
       this.segments = segments;
-      this.doNow = SELECT_SEGMENT;
       this.highlightedSegment = null;
       this.forceNumber1 = lastNonusedForceNumber;
       this.forceNumber2 = lastNonusedForceNumber + 1;
 
-      this.snap = parent1.snap;
-      parent1.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      initHandlers();
+      initEvents();
     }
-
-    private function onMouseMove(e:MouseEvent)
+    
+    private function initHandlers()
     {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doHighlightSegment(e);
-          break;
-        case SELECT_POSITION:
-          doMoveArrow(e);
-          break;
-        case SELECT_LENGTH_HEIGHT:
-          doMoveSecondPoint(e);
-      }
+      moveHandlers[0] = highlightSegment;
+      moveHandlers[1] = moveArrow;
+      moveHandlers[2] = moveSecondPoint;
+
+      downHandlers[0] = selectSegment;
+      downHandlers[1] = fixPosition;
+      downHandlers[2] = fixLength;
     }
 
-    private function doHighlightSegment(e)
+    private function highlightSegment(e)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -128,18 +104,18 @@
       }
     }
 
-    private function doMoveArrow(e:MouseEvent)
+    private function moveArrow(e:MouseEvent)
     {
       var p:Point;
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       p = snap.doSnapToSegment(cursorPosition, highlightedSegment);
       p = snap.doSnapToForce(p, highlightedSegment);
-      this.arrows.x = p.x;
-      this.arrows.y = p.y;
+      this.elementImage.x = p.x;
+      this.elementImage.y = p.y;
       arrowsCoordinate1 = p;
     }
 
-    private function doMoveSecondPoint(e:MouseEvent)
+    private function moveSecondPoint(e:MouseEvent)
     {
       var length:Number;
       var height:Number;
@@ -148,7 +124,7 @@
       var positionOfsecondPointOnSegment:Point;
       var p:Point;
       var angle:Number;
-      parent1.removeChild(arrows);
+      parent1.removeChild(elementImage);
 
       //находим высоту
       p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
@@ -175,33 +151,19 @@
       }
       trace(height);
 
-      arrows = new RectangularArrowsArray(length, height, angle, 0);
+      elementImage = new RectangularArrowsArray(length, height, angle, 0);
       button_over = new RectangularArrowsArray(length, height, angle, 0xff);
       button_up = new RectangularArrowsArray(length, height, angle, 0);
       button_down = button_up;
       button_hit = button_up;
 
-      arrows.x = arrowsCoordinate1.x;
-      arrows.y = arrowsCoordinate1.y;
-      parent1.addChild(arrows);
+      elementImage.x = arrowsCoordinate1.x;
+      elementImage.y = arrowsCoordinate1.y;
+      parent1.addChild(elementImage);
     }
 
-    private function onMouseDown(e:MouseEvent)
-    {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doSelectSegment(e);
-          break;
-        case SELECT_POSITION:
-          doSelectPosition();
-          break;
-        case SELECT_LENGTH_HEIGHT:
-          doSelectSecondPointPosition(e);
-      }
-    }
 
-    private function doSelectSegment(e:MouseEvent)
+    private function selectSegment(e:MouseEvent)
     {
       var angle:Number;
       var p:Point;
@@ -210,63 +172,52 @@
       {
         p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
         angle = CoordinateTransformation.decartToPolar(p).y;
-        doNow = SELECT_POSITION;
+        
+        nextHandlers();
+        
         highlightedSegment.setColor(0x0);
         positionOfArrow = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
-        arrows = new RectangularArrowsArray(10,20,angle,0);
-        parent1.addChild(arrows);
-        arrows.x = positionOfArrow.x;
-        arrows.y = positionOfArrow.y;
+        elementImage = new RectangularArrowsArray(10,20,angle,0);
+        parent1.addChild(elementImage);
+        elementImage.x = positionOfArrow.x;
+        elementImage.y = positionOfArrow.y;
         arrowsCoordinate1 = positionOfArrow;
       }
     }
 
-    private function doSelectPosition(){
-      doNow = SELECT_LENGTH_HEIGHT;
+    private function fixPosition(){
+      nextHandlers();
     }
 
-    private function doSelectSecondPointPosition(e:MouseEvent)
+    private function fixLength(e:MouseEvent)
     {
       if(arrowsCoordinate2.equals(arrowsCoordinate1))
         return;
 
-      // убираем всех прослушивателей событий
-      parent1.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-
+      releaseEvents();
+      initDialog();
+    }
+    
+    protected function initDialog()
+    {
       dialogWnd = new EditWindowQ("","");
       parent1.addChild(dialogWnd);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-
-    private function onEndEditInDialogWindow(e:Event)
+    
+    override protected function createObject(data:Object)
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(arrows);
-
-      forceName = dialogWnd.force;
-      forceValue = dialogWnd.value;
-      dimension = dialogWnd.dimension;
-      dialogWnd = null;
-      doCreateDistributedForce();
-      dispatchEvent(new Event(DistributedForceRCreator.CREATE_DONE));
-    }
-
-    private function doCreateDistributedForce()
-    {
+    
       var p:Point;
       var angle:Number;
-      distributedForceR = new DistributedForceR(parent1, button_up, button_over, button_down, button_hit, forceName);
+      distributedForceR = new DistributedForceR(parent1, button_up, button_over, button_down, button_hit, data.forceName);
 
-      distributedForceR.dimension = dimension;
+      distributedForceR.forceValue = data.forceValue;
+      distributedForceR.units = data.units;
       distributedForceR.segment = highlightedSegment;
-      distributedForceR.forceValue = forceValue;
+      
       distributedForceR.firstScreenCoord = arrowsCoordinate1;
       distributedForceR.secondScreenCoord = arrowsCoordinate2;
       distributedForceR.forceNumber1 = this.forceNumber1;
@@ -282,18 +233,10 @@
       distributedForceR.setCoordOfForceName(p);
       distributedForceR.x = arrowsCoordinate1.x;
       distributedForceR.y = arrowsCoordinate1.y;
-    }
+    
+      super.createObject(data);
 
-    private function onCancelEditInDialogWindow(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(arrows);
-
-      dialogWnd = null;
-      dispatchEvent(new Event(DistributedForceRCreator.CREATE_CANCEL));
+      //dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
     public function get result():DistributedForceR
