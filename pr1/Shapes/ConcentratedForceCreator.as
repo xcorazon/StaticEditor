@@ -22,17 +22,13 @@
     public static const CREATE_CANCEL:String = "Cancel creation of concentrated force";
     public static const CREATE_DONE:String = "Done creation of concentrated force";
 
-    private var segments:Array;
     private var forceNumber:int;
     private var highlightedSegment:Segment;
     private var panel:ConcentratedForcePanel;
-    private var snap:Snap;
-
 
     private var isTail:Boolean;
     // выходные данные
     private var anglePoints:Array;
-    private var arrow:Arrow;
     private var arrowAngle:Number;
     private var arrowCoordinates:Point;   // координаты стрелки на экране
 
@@ -47,16 +43,14 @@
     public function ConcentratedForceCreator(frame:Frame)
     {
       super(frame);
-      this.segments = frame.Segments;;
 
       this.highlightedSegment = null;
       this.forceNumber = frame.lastNonUsedConcentratedForce;
-      this.snap = parent1.snap;
-      
+
       initEvents();
       initHandlers();
     }
-    
+
     private function initHandlers()
     {
       moveHandlers[0] = highlightSegment;
@@ -118,24 +112,24 @@
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       p = snap.doSnapToSegment(cursorPosition, highlightedSegment);
       p = snap.doSnapToForce(p, highlightedSegment);
-      this.arrow.x = p.x;
-      this.arrow.y = p.y;
+      this.elementImage.x = p.x;
+      this.elementImage.y = p.y;
       arrowCoordinates = p;
     }
 
     private function rotateArrow(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
-      parent1.removeChild(arrow);
-      arrow = new Arrow(arrowCoordinates, panel.angleOfAxis, cursorPosition, isTail, 0);
+      parent1.removeChild(elementImage);
+      elementImage = new Arrow(arrowCoordinates, panel.angleOfAxis, cursorPosition, isTail, 0);
       button_over = new Arrow(arrowCoordinates, panel.angleOfAxis, cursorPosition, isTail, 0xff);
       button_up = new Arrow(arrowCoordinates, panel.angleOfAxis, cursorPosition, isTail, 0);;
       button_down = button_up;
       button_hit = button_up;
 
-      arrow.x = arrowCoordinates.x;
-      arrow.y = arrowCoordinates.y;
-      parent1.addChild(arrow);
+      elementImage.x = arrowCoordinates.x;
+      elementImage.y = arrowCoordinates.y;
+      parent1.addChild(elementImage);
     }
 
     private function onChangePanel(e:Event)
@@ -155,15 +149,15 @@
       {
         p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
         angle = CoordinateTransformation.decartToPolar(p).y;
-        
+
         nextHandlers();
-        
+
         highlightedSegment.setColor(0x0);
         positionOfArrow = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
-        arrow = new Arrow(positionOfArrow, angle, new Point(e.stageX, e.stageY), false, 0);
-        parent1.addChild(arrow);
-        arrow.x = positionOfArrow.x;
-        arrow.y = positionOfArrow.y;
+        elementImage = new Arrow(positionOfArrow, angle, new Point(e.stageX, e.stageY), false, 0);
+        parent1.addChild(elementImage);
+        elementImage.x = positionOfArrow.x;
+        elementImage.y = positionOfArrow.y;
         arrowCoordinates = positionOfArrow;
       }
     }
@@ -172,9 +166,9 @@
     {
       panel = new ConcentratedForcePanel();
       panel.x = 800 - 245;
-      
+
       nextHandlers();
-      
+
       panel.setSegmentPoints(highlightedSegment.firstPointNumber,
                    highlightedSegment.firstDecartCoord,
                    highlightedSegment.secondPointNumber,
@@ -187,15 +181,15 @@
     {
       // убираем всех прослушивателей событий
       panel.removeEventListener(ConcentratedForcePanel.CHANGE_STATE, onChangePanel);
-      
+
       releaseEvents();
-      
+
       anglePoints = panel.pointsOfAngle;
       panel.destroy();
       parent1.removeChild(panel);
 
       anglePoints[1] = this.forceNumber;
-      arrowAngle = arrow.angleOfTipOrTail;
+      arrowAngle = elementImage.angleOfTipOrTail;
 
       var angleValue:String = "";
       if(Math.abs(this.arrowAngle) == Math.PI/2)
@@ -210,10 +204,10 @@
       {
         angleValue = "0";
       }
-      
+
       initDialog();
     }
-    
+
     private function initDialog()
     {
       dialogWnd = new EditWindow3("","","",angleValue);
@@ -222,27 +216,9 @@
       dialogWnd.y = 300;
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-    
-    private function releaseDialog()
-    {
-      dialogWnd.removeEventListener(DialogEvent.END_DIALOG, onEndDialog);
-      
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(arrow);
-      dialogWnd = null;
-    }
 
-    private function onEndDialog(e:DialogEvent)
-    {
-      releaseDialog();
-      
-      if(e.canceled)
-        creationCancel();
-      else
-        createForce(e.eventData);
-    }
 
-    private function createForce(data:Object)
+    override protected function createObject(data:Object)
     {
       var p:Point;
       var angle:Number;
@@ -253,7 +229,7 @@
       force.forceNumber = forceNumber;
       force.angleValue = data.angleValue;
       force.forceValue = data.forceValue;
-      force.angleSign = arrow.angleSign;
+      force.angleSign = elementImage.angleSign;
       force.anglePoints = this.anglePoints;
 
       angle = panel.angleOfAxis;
@@ -267,13 +243,9 @@
       force.setCoordOfAngleName(p);
       force.x = arrowCoordinates.x;
       force.y = arrowCoordinates.y;
-      
-      dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
-    }
 
-    private function creationCancel()
-    {
-      dispatchEvent(new Event(ConcentratedForceCreator.CREATE_CANCEL));
+      super.createObject(data);
+      //dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
     public function get result():ConcentratedForce

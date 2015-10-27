@@ -1,146 +1,106 @@
 ﻿package  pr1.Shapes
 {
   import flash.display.SimpleButton;
-  import flash.display.Sprite;
   import flash.events.MouseEvent;
   import flash.geom.Point;
-  import flash.events.Event;
   import pr1.Shapes.LinearDimension;
   import pr1.CoordinateTransformation;
   import pr1.ComConst;
   import pr1.windows.EditWindow4;
-  import pr1.windows.EditWindow;
   import pr1.razmers.LinearDimensionXContainer;
   import pr1.Snap;
   import pr1.forces.*;
   import pr1.opora.*;
+  import pr1.Frame;
 
-  public class LinearDimensionCreatorX extends Sprite
+  public class LinearDimensionCreatorX extends Creator
   {
-    // события в объекте
-    public static const CREATE_CANCEL:String = "Cancel creation of dimension X";
-    public static const CREATE_DONE:String = "Done creation of dimension X";
-    // константы для внутреннего использования
-    private static const SELECT_FIRST_POINT:int = 0;
-    private static const SELECT_SECOND_POINT:int = 1;
-    private static const SELECT_HEIGHT:int = 2;
+    protected var firstCoordinate:Point;  // координаты первой точки размера на экране
+    protected var secondCoordinate:Point;   // координаты второй точки размера на экране
+    protected var razmerHeight:Number;
+    protected var firstPointNumber:int;
+    protected var secondPointNumber:int;
 
-    private var parent1:*;
-    private var segments:Array;
-    private var highlightedSegment:Segment;
-    private var snap:Snap;
-    private var linearDimension:LinearDimension;  //
-
-    // выходные данные
-    private var firstCoordinate:Point;  // координаты первой точки размера на экране
-    private var secondCoordinate:Point;   // координаты второй точки размера на экране
-    private var razmerHeight:Number;
-    private var firstPointNumber:int;
-    private var secondPointNumber:int;
-    private var razmerName:String;
-    private var razmerValue:String;
-    private var dimension:String; // размерность размера (м, мм, см)
-
-    private var button_up:LinearDimension;
-    private var button_over:LinearDimension;
-    private var button_down:LinearDimension;
-    private var button_hit:LinearDimension;
+    protected var button_up:LinearDimension;
+    protected var button_over:LinearDimension;
+    protected var button_down:LinearDimension;
+    protected var button_hit:LinearDimension;
     //cам элемент нагрузки в полном виде
-    private var razmer:LinearDimensionXContainer = null;
+    protected var razmer:* = null;
+    
+    protected var dimAngle:Number;
 
-    private var dialogWnd:EditWindow4;
 
-    private var doNow:int;
-
-    public function LinearDimensionCreatorX(parent:*, segments:Array)
+    public function LinearDimensionCreatorX(frame:Frame)
     {
-      // constructor code
-      this.parent1 = parent;
-      this.segments = segments;
-      this.doNow = SELECT_FIRST_POINT;
-      this.highlightedSegment = null;
+      super(frame);
 
-      this.snap = parent1.snap;
-      this.linearDimension = new LinearDimension(new Point(0,0), new Point(15,0), -20, 0, 0);
-      parent1.addChild(linearDimension);
-      parent1.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      this.elementImage = new LinearDimension(new Point(0,0), new Point(15,0), -20, 0, 0);
+      parent1.addChild(elementImage);
+      dimAngle = 0;
+
+      initHandlers();
+      initEvents();
     }
 
-    private function onMouseMove(e:MouseEvent)
+    private function initHandlers()
     {
-      switch(doNow)
-      {
-        case SELECT_FIRST_POINT:
-          doSnapToFirstPoint(e);
-          break;
-        case SELECT_SECOND_POINT:
-          doSnapToSecondPoint(e);
-          break;
-        case SELECT_HEIGHT:
-          doMoveHeight(e);
-      }
+      moveHandlers[0] = snapFirstPoint;
+      moveHandlers[1] = snapSecondPoint;
+      moveHandlers[2] = changeHeight;
+
+      downHandlers[0] = selectFirstPoint;
+      downHandlers[1] = selectSecondPoint;
+      downHandlers[2] = fixHeight;
     }
 
-    private function doSnapToFirstPoint(e)
+
+    private function snapFirstPoint(e)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var p:Point = snap.doSnapToAnything(cursorPosition);
-      linearDimension.x = p.x;
-      linearDimension.y = p.y;
+      elementImage.x = p.x;
+      elementImage.y = p.y;
     }
 
-    private function doSnapToSecondPoint(e:MouseEvent)
+    private function snapSecondPoint(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var p:Point = snap.doSnapToAnything(cursorPosition);
-      parent1.removeChild(linearDimension);
-      linearDimension = new LinearDimension(firstCoordinate, p, -20, 0, 0);
+      parent1.removeChild(elementImage);
+      elementImage = new LinearDimension(firstCoordinate, p, -20, dimAngle, 0);
 
-      linearDimension.x = firstCoordinate.x;
-      linearDimension.y = firstCoordinate.y;
+      elementImage.x = firstCoordinate.x;
+      elementImage.y = firstCoordinate.y;
 
-      parent1.addChild(linearDimension);
+      parent1.addChild(elementImage);
     }
 
-    private function doMoveHeight(e:MouseEvent)
+    private function changeHeight(e:MouseEvent)
     {
-      var height:Number;
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
-      parent1.removeChild(linearDimension);
+      parent1.removeChild(elementImage);
 
-      //находим высоту
-      height = firstCoordinate.y - cursorPosition.y;
-      razmerHeight = height;
+      razmerHeight = getHeight();
 
-      linearDimension = new LinearDimension(firstCoordinate, secondCoordinate, height, 0, 0);
-      button_over = new LinearDimension(firstCoordinate, secondCoordinate, height, 0, 0xff);
-      button_up = new LinearDimension(firstCoordinate, secondCoordinate, height, 0, 0);
+      elementImage = new LinearDimension(firstCoordinate, secondCoordinate, razmerHeight, dimAngle, 0);
+      button_over = new LinearDimension(firstCoordinate, secondCoordinate, razmerHeight, dimAngle, 0xff);
+      button_up = new LinearDimension(firstCoordinate, secondCoordinate, razmerHeight, dimAngle, 0);
       button_down = button_up;
       button_hit = button_up;
 
-      linearDimension.x = firstCoordinate.x;
-      linearDimension.y = firstCoordinate.y;
-      parent1.addChild(linearDimension);
+      elementImage.x = firstCoordinate.x;
+      elementImage.y = firstCoordinate.y;
+      parent1.addChild(elementImage);
     }
-
-    private function onMouseDown(e:MouseEvent)
+    
+    protected function getHeight():Number
     {
-      switch(doNow)
-      {
-        case SELECT_FIRST_POINT:
-          doSelectFirstPoint(e);
-          break;
-        case SELECT_SECOND_POINT:
-          doSelectSecondPoint(e);
-          break;
-        case SELECT_HEIGHT:
-          doSelectHeight(e);
-      }
+      return firstCoordinate.y - cursorPosition.y;
     }
 
 
-    private function doSelectFirstPoint(e:MouseEvent)
+    private function selectFirstPoint(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var p:Point = snap.doSnapToAnything(cursorPosition);
@@ -150,13 +110,13 @@
         {
            this.firstPointNumber = snap.lastSnappedObject.firstPointNumber;
            firstCoordinate = p;
-           doNow = SELECT_SECOND_POINT;
+           nextHandlers();
         }
         else if(p.equals(snap.lastSnappedObject.secondScreenCoord))
         {
            this.firstPointNumber = snap.lastSnappedObject.secondPointNumber;
            firstCoordinate = p;
-           doNow = SELECT_SECOND_POINT;
+           nextHandlers();
         }
       }
 
@@ -164,7 +124,7 @@
       {
         this.firstPointNumber = snap.lastSnappedObject.forceNumber;
         firstCoordinate = p;
-        doNow = SELECT_SECOND_POINT;
+        nextHandlers();
       }
 
       if(snap.lastSnappedObject is DistributedForceR || snap.lastSnappedObject is DistributedForceT)
@@ -173,13 +133,13 @@
         {
           this.firstPointNumber = snap.lastSnappedObject.forceNumber1;
           firstCoordinate = p;
-          doNow = SELECT_SECOND_POINT;
+          nextHandlers();
         }
         if(p.equals(snap.lastSnappedObject.secondScreenCoord))
         {
           this.firstPointNumber = snap.lastSnappedObject.forceNumber2;
           firstCoordinate = p;
-          doNow = SELECT_SECOND_POINT;
+          nextHandlers();
         }
       }
       if(snap.lastSnappedObject is MovableJointContainer || snap.lastSnappedObject is FixedJointContainer || snap.lastSnappedObject is SealingContainer)
@@ -188,15 +148,15 @@
         {
           this.firstPointNumber = snap.lastSnappedObject.pointNumber;
           firstCoordinate = p;
-          doNow = SELECT_SECOND_POINT;
+          nextHandlers();
         }
       }
 
-      linearDimension.x = p.x;
-      linearDimension.y = p.y;
+      elementImage.x = p.x;
+      elementImage.y = p.y;
     }
 
-    private function doSelectSecondPoint(e:MouseEvent)
+    private function selectSecondPoint(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var p:Point = snap.doSnapToAnything(cursorPosition);
@@ -210,13 +170,13 @@
         {
            this.secondPointNumber = snap.lastSnappedObject.firstPointNumber;
            secondCoordinate = p;
-           doNow = SELECT_HEIGHT;
+           nextHandlers();
         }
         else if(p.equals(snap.lastSnappedObject.secondScreenCoord))
         {
            this.secondPointNumber = snap.lastSnappedObject.secondPointNumber;
            secondCoordinate = p;
-           doNow = SELECT_HEIGHT;
+           nextHandlers();
         }
       }
 
@@ -224,7 +184,7 @@
       {
         this.secondPointNumber = snap.lastSnappedObject.forceNumber;
         secondCoordinate = p;
-        doNow = SELECT_HEIGHT;
+        nextHandlers();
       }
 
       if(snap.lastSnappedObject is DistributedForceR || snap.lastSnappedObject is DistributedForceT)
@@ -233,13 +193,13 @@
         {
           this.secondPointNumber = snap.lastSnappedObject.forceNumber1;
           secondCoordinate = p;
-          doNow = SELECT_HEIGHT;
+          nextHandlers();
         }
         if(p.equals(snap.lastSnappedObject.secondScreenCoord))
         {
           this.secondPointNumber = snap.lastSnappedObject.forceNumber2;
           secondCoordinate = p;
-          doNow = SELECT_HEIGHT;
+          nextHandlers();
         }
       }
       if(snap.lastSnappedObject is MovableJointContainer || snap.lastSnappedObject is FixedJointContainer || snap.lastSnappedObject is SealingContainer)
@@ -248,50 +208,42 @@
         {
           this.secondPointNumber = snap.lastSnappedObject.pointNumber;
           secondCoordinate = p;
-          doNow = SELECT_HEIGHT;
+          nextHandlers();
         }
       }
     }
 
-    private function doSelectHeight(e:MouseEvent)
+    private function fixHeight(e:MouseEvent)
     {
-      // убираем всех прослушивателей событий
-      parent1.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      releaseEvents();
+      initDialog();
+    }
 
+    private function initDialog()
+    {
       dialogWnd = new EditWindow4("","");
       parent1.addChild(dialogWnd);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    private function onEndEditInDialogWindow(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
 
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(linearDimension);
-
-      razmerName = dialogWnd.razmer;
-      razmerValue = dialogWnd.value;
-      dimension = dialogWnd.dimension;
-      dialogWnd = null;
-      doCreateLinearDimension();
-      dispatchEvent(new Event(LinearDimensionCreatorX.CREATE_DONE));
-    }
-
-    private function doCreateLinearDimension()
+    override protected function createObject(data:Object)
     {
       var p:Point;
       var angle:Number;
-      razmer = new LinearDimensionXContainer(parent1, button_up, button_over, button_down, button_hit,
-                      razmerName);
-      razmer.dimension = dimension;
-      razmer.razmerValue = razmerValue;
-      razmer.razmerName = razmerName;
+      razmer = new LinearDimensionXContainer(parent1, button_up, button_over, button_down, button_hit, data.name);
+      setValues(razmer, data);
+	  
+      super.createObject(data);
+    }
+    
+    protected function setValues(razmer:*, data:Object)
+    {
+      razmer.units = data.units;
+      razmer.razmerValue = data.value;
+      razmer.razmerName = data.name;
 
       razmer.firstPointDecartCoord = CoordinateTransformation.screenToLocal(firstCoordinate, new Point(0,600),0);
       razmer.secondPointDecartCoord = CoordinateTransformation.screenToLocal(secondCoordinate, new Point(0,600),0);
@@ -304,19 +256,7 @@
       razmer.setCoordOfRazmerName();
     }
 
-    private function onCancelEditInDialogWindow(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(linearDimension);
-
-      dialogWnd = null;
-      dispatchEvent(new Event(LinearDimensionCreatorX.CREATE_CANCEL));
-    }
-
-    public function get result():LinearDimensionXContainer
+    public function get result():*
     {
       return razmer;
     }

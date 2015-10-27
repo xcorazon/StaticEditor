@@ -10,8 +10,6 @@
   public class EditWindowQ extends EditWindow
   {
     private var checkButton:CheckButton;
-    
-    public var force:String;
 
     public function EditWindowQ(forceValue:String, forceName:String)
     {

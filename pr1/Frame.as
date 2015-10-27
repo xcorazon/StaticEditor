@@ -10,6 +10,7 @@
   import pr1.forces.*;
   import pr1.razmers.*;
   import pr1.Shapes.MomentCreator;
+  import pr1.Shapes.Creator;
   import pr1.Snap;
   import pr1.Shapes.DistributedForceRCreator;
   import pr1.Shapes.DistributedForceTCreator;
@@ -313,24 +314,24 @@
     //создание размера X
     private function createDimensionX(e:Event){
       lockAllElements();
-      creator = new LinearDimensionCreatorX(parent1, segments);
-      creator.addEventListener(LinearDimensionCreatorX.CREATE_DONE, dimensionXCreationDone);
-      creator.addEventListener(LinearDimensionCreatorX.CREATE_CANCEL, dimensionXCreationCancel);
+      creator = new LinearDimensionCreatorX(this);
+      creator.addEventListener(Creator.CREATE_DONE, dimensionXCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, dimensionXCreationCancel);
 
     }
     private function dimensionXCreationDone(e:Event){
       unlockAllElements();
       updateLinearDimensions(creator.result);
       dimensionX.push(creator.result);
-      creator.removeEventListener(LinearDimensionCreatorX.CREATE_DONE, dimensionXCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, dimensionXCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(LinearDimensionCreatorX.CREATE_CANCEL, dimensionXCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, dimensionXCreationCancel);
       mainPanel.setButtonsActiveState();
     }
     private function dimensionXCreationCancel(e:Event){
       unlockAllElements();
-      creator.removeEventListener(LinearDimensionCreatorX.CREATE_DONE, dimensionXCreationDone);
-      creator.removeEventListener(LinearDimensionCreatorX.CREATE_CANCEL, dimensionXCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, dimensionXCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, dimensionXCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 
@@ -338,23 +339,23 @@
     private function createDimensionY(e:Event){
       lockAllElements();
       creator = new LinearDimensionCreatorY(parent1, segments);
-      creator.addEventListener(LinearDimensionCreatorY.CREATE_DONE, dimensionYCreationDone);
-      creator.addEventListener(LinearDimensionCreatorY.CREATE_CANCEL, dimensionYCreationCancel);
+      creator.addEventListener(Creator.CREATE_DONE, dimensionYCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, dimensionYCreationCancel);
 
     }
     private function dimensionYCreationDone(e:Event){
       unlockAllElements();
       updateLinearDimensions(creator.result);
       dimensionY.push(creator.result);
-      creator.removeEventListener(LinearDimensionCreatorY.CREATE_DONE, dimensionYCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, dimensionYCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(LinearDimensionCreatorY.CREATE_CANCEL, dimensionYCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, dimensionYCreationCancel);
       mainPanel.setButtonsActiveState();
     }
     private function dimensionYCreationCancel(e:Event){
       unlockAllElements();
-      creator.removeEventListener(LinearDimensionCreatorY.CREATE_DONE, dimensionYCreationDone);
-      creator.removeEventListener(LinearDimensionCreatorY.CREATE_CANCEL, dimensionYCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, dimensionYCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, dimensionYCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 

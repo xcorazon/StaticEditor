@@ -3,12 +3,12 @@
   import flash.display.SimpleButton;
   import flash.display.Sprite;
   import flash.events.MouseEvent;
-  
+
   import flash.geom.Point;
   import flash.events.Event;
-  
+
   import pr1.events.DialogEvent;
-  
+
   import pr1.panels.MomentPanel;
   import pr1.Shapes.ArcArrow;
   import pr1.CoordinateTransformation;
@@ -18,7 +18,7 @@
   import pr1.forces.Moment;
   import pr1.Snap;
   import pr1.Frame;
-  
+
 
   public class MomentCreator extends Creator
   {
@@ -26,14 +26,11 @@
     public static const CREATE_CANCEL:String = "Cancel creation of moment";
     public static const CREATE_DONE:String = "Done creation of moment";
 
-    private var segments:Array;
     private var momentNumber:int;
     private var highlightedSegment:Segment;
     private var panel:MomentPanel;
-    private var snap:Snap;
 
     // выходные данные
-    private var arrow:ArcArrow;
     private var arrowAngle:Number;
     private var arrowCoordinates:Point;   // координаты стрелки на экране
     private var isClockWise:Boolean;
@@ -49,14 +46,12 @@
     public function MomentCreator(frame:Frame)
     {
       super(frame);
-      this.segments = frame.Segments;
       this.highlightedSegment = null;
       this.momentNumber = frame.lastNonUsedMoment;
-      snap = parent1.snap;
 
       initHandlers();
       initEvents();
-      
+
     }
 
     private function initHandlers()
@@ -120,24 +115,24 @@
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       p = snap.doSnapToSegment(cursorPosition, highlightedSegment);
       p = snap.doSnapToForce(p, highlightedSegment);
-      this.arrow.x = p.x;
-      this.arrow.y = p.y;
+      this.elementImage.x = p.x;
+      this.elementImage.y = p.y;
       arrowCoordinates = p;
     }
 
     private function rotateArrow(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
-      parent1.removeChild(arrow);
-      arrow = new ArcArrow(arrowCoordinates, cursorPosition, panel.isMomentClockWise, 0);
+      parent1.removeChild(elementImage);
+      elementImage = new ArcArrow(arrowCoordinates, cursorPosition, panel.isMomentClockWise, 0);
       button_over = new ArcArrow(arrowCoordinates, cursorPosition, panel.isMomentClockWise, 0xff);
       button_up = new ArcArrow(arrowCoordinates, cursorPosition, panel.isMomentClockWise, 0);
       button_down = button_up;
       button_hit = button_up;
 
-      arrow.x = arrowCoordinates.x;
-      arrow.y = arrowCoordinates.y;
-      parent1.addChild(arrow);
+      elementImage.x = arrowCoordinates.x;
+      elementImage.y = arrowCoordinates.y;
+      parent1.addChild(elementImage);
     }
 
 
@@ -153,10 +148,10 @@
         highlightedSegment.setColor(0x0);
         positionOfArrow = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
         positionOfArrow = snap.doSnapToForce( positionOfArrow, highlightedSegment);
-        arrow = new ArcArrow(positionOfArrow, new Point(e.stageX, e.stageY), true, 0);
-        parent1.addChild(arrow);
-        arrow.x = positionOfArrow.x;
-        arrow.y = positionOfArrow.y;
+        elementImage = new ArcArrow(positionOfArrow, new Point(e.stageX, e.stageY), true, 0);
+        parent1.addChild(elementImage);
+        elementImage.x = positionOfArrow.x;
+        elementImage.y = positionOfArrow.y;
         arrowCoordinates = positionOfArrow;
       }
     }
@@ -180,11 +175,11 @@
       panel.destroy();
       parent1.removeChild(panel);
 
-      arrowAngle = arrow.angleOfTip;
+      arrowAngle = elementImage.angleOfTip;
 
       initDialog();
     }
-    
+
     private function initDialog()
     {
       dialogWnd = new EditWindowMoment("","");
@@ -193,28 +188,9 @@
       dialogWnd.y = 300;
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-    
-    private function releaseDialog()
-    {
-      dialogWnd.removeEventListener(DialogEvent.END_DIALOG, onEndDialog);
-      
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(arrow);
-      dialogWnd = null;
-    }
 
-    
-    private function onEndDialog(e:DialogEvent)
-    {
-      releaseDialog();
-      
-      if(e.canceled)
-        creationCancel();
-      else
-        createMoment(e.eventData);
-    }
 
-    private function createMoment(data:Object)
+    override protected function createObject(data:Object)
     {
       var p:Point;
       var angle:Number;
@@ -222,7 +198,7 @@
 
       moment.units = data.units;
       moment.momentValue = data.forceValue;
-      
+
       moment.segment = highlightedSegment;
       moment.momentNumber = momentNumber;
       moment.isClockWise = this.isClockWise;
@@ -231,13 +207,10 @@
       moment.setCoordOfMomentName(p);
       moment.x = arrowCoordinates.x;
       moment.y = arrowCoordinates.y;
-      
-      dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
-    }
 
-    private function creationCancel()
-    {
-      dispatchEvent(new Event(ConcentratedForceCreator.CREATE_CANCEL));
+      super.createObject(data);
+
+      //dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
     public function get result():Moment
