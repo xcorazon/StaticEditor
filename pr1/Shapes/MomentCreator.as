@@ -194,10 +194,11 @@
     {
       var p:Point;
       var angle:Number;
-      moment = new Moment(parent1, button_up, button_over, button_down, button_hit, data.forceName);
+      moment = new Moment(frame, button_up, button_over, button_down, button_hit, data.forceName);
 
       moment.units = data.units;
       moment.momentValue = data.forceValue;
+      moment.momentName  = data.forceName;
 
       moment.segment = highlightedSegment;
       moment.momentNumber = momentNumber;

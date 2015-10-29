@@ -30,10 +30,11 @@
     public function Element(frame:Frame, upState:DisplayObject, overState:DisplayObject, downState:DisplayObject, hitTestState:DisplayObject)
     {
       parent1 = frame.parent1;
-      params = new Object();
+      params     = new Object();
+      sigPoses   = new Object();
       signatures = new Object();
 
-      timesFont = new Times1();
+      timesFont  = new Times1();
 
       button = new SimpleButton(upState, overState, downState, hitTestState);
       addChild(button);

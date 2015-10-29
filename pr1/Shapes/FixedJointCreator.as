@@ -217,6 +217,7 @@
       fixedJointContainer.pointNumber = this.pointNumber;
       fixedJointContainer.setCoordOfSignatures();
 
+      super.createObject(data);
     }
 
 

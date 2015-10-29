@@ -129,7 +129,8 @@ package pr1.windows
         event.canceled = true;
 
       dispatchEvent(event);
-      _units.destroy();
+      if (_units != null)
+        _units.destroy();
     }
 
     protected function setEventData():Object

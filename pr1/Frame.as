@@ -202,8 +202,8 @@
 
       lockAllElements();
       creator = new MomentCreator(this);
-      creator.addEventListener(ConcentratedForceCreator.CREATE_DONE, momentCreationDone);
-      creator.addEventListener(ConcentratedForceCreator.CREATE_CANCEL, momentCreationCancel);
+      creator.addEventListener(Creator.CREATE_DONE, momentCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, momentCreationCancel);
     }
     private function momentCreationDone(e:Event)
     {
@@ -212,17 +212,17 @@
       mForces.push(creator.result);
       snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
       parent1.snap = snap1;
-      creator.removeEventListener(ConcentratedForceCreator.CREATE_DONE, momentCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, momentCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(ConcentratedForceCreator.CREATE_CANCEL, momentCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, momentCreationCancel);
       mainPanel.setButtonsActiveState();
       lastNonUsedMoment++;
     }
     private function momentCreationCancel(e:Event)
     {
       unlockAllElements();
-      creator.removeEventListener(ConcentratedForceCreator.CREATE_DONE, momentCreationDone);
-      creator.removeEventListener(ConcentratedForceCreator.CREATE_CANCEL, momentCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, momentCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, momentCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 

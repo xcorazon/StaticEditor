@@ -53,7 +53,7 @@ package pr1.windows
       if(value != "")
         razmerValue.text = String(value);
 
-      var _units:ComBox = new ComBox(35, 20, new Array("м","см","мм"));
+      _units = new ComBox(35, 20, new Array("м","см","мм"));
       _units.x = 70;
       _units.y = -30;
       addChild(_units);
