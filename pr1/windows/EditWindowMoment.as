@@ -36,8 +36,8 @@
       addChild(backgrnd);
     }
 
-    
-    public function set units(s:String)
+
+    public override function set units(s:String)
     {
       switch(s)
       {

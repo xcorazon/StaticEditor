@@ -1,78 +1,48 @@
 ﻿package  pr1.Shapes
 {
-  import flash.display.SimpleButton;
-  import flash.display.Sprite;
   import flash.events.MouseEvent;
   import flash.geom.Point;
-  import flash.events.Event;
-  import pr1.Shapes.Arrow;
   import pr1.CoordinateTransformation;
   import pr1.ComConst;
   import pr1.windows.EditWindowFixedJoint;
-  import pr1.windows.EditWindow;
-  import pr1.forces.ConcentratedForce;
-  import pr1.Snap;
   import pr1.opora.FixedJointContainer;
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
 
-  public class FixedJointCreator extends Sprite
+  public class FixedJointCreator extends Creator
   {
-    // события в объекте
-    public static const CREATE_CANCEL:String = "Cancel creation of sealing";
-    public static const CREATE_DONE:String = "Done creation of sealing";
-    // константы для внутреннего использования
-    private static const SELECT_SEGMENT:int = 0;
-    private static const SELECT_POSITION:int = 1;
-    private static const SELECT_ANGLE:int = 2;
-
-    private var parent1:*;
-    private var segments:Array;
-    private var snap:Snap;
-    private var fixedJoint:FixedJoint;
     private var highlightedSegment:Segment;
 
     // выходные данные
     private var pointNumber:int;
     private var angleOfFixedJoint:Number;
     private var fixedJointPosition:Point;
-    private var horisontalReaction:String;
-    private var verticalReaction:String;
 
     //cам элемент защемления в полном виде
     private var fixedJointContainer:FixedJointContainer = null;
 
 
-    private var dialogWnd:EditWindowFixedJoint;
-
-    private var doNow:int;
-
-    public function FixedJointCreator(parent, segments:Array, lastNonUsedJoint:int)
+    public function FixedJointCreator(frame:Frame)
     {
-      this.parent1 = parent;
-      this.segments = segments;
-      this.doNow = SELECT_SEGMENT;
-      this.pointNumber = lastNonUsedJoint;
+      super(frame);
+      this.pointNumber = frame.lastNonUsedJoint;
 
-      this.snap = parent1.snap;
-      parent1.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      initEvents();
+      initHandlers();
     }
 
-    private function onMouseMove(e:MouseEvent)
+    private function initHandlers()
     {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doHighlightSegment(e);
-          break;
-        case SELECT_POSITION:
-          doMoveJoint(e);
-          break;
-        case SELECT_ANGLE:
-          doRotateJoint(e);
-      }
+      moveHandlers[0] = highlightSegment;
+      moveHandlers[1] = moveJoint;
+      moveHandlers[2] = rotateJoint;
+
+      downHandlers[0] = selectSegment;
+      downHandlers[1] = fixPosition;
+      downHandlers[2] = fixAngle;
     }
 
-    private function doHighlightSegment(e)
+    private function highlightSegment(e)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -116,109 +86,58 @@
       }
     }
 
-    private function doMoveJoint(e:MouseEvent)
+    private function moveJoint(e:MouseEvent)
     {
       var p:Point;
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       p = snap.doSnapToSegment(cursorPosition, highlightedSegment);
       p = snap.doSnapToForce(p, highlightedSegment);
-      this.fixedJoint.x = p.x;
-      this.fixedJoint.y = p.y;
+      this.elementImage.x = p.x;
+      this.elementImage.y = p.y;
       fixedJointPosition = p;
     }
 
-    private function doRotateJoint(e:MouseEvent)
+    private function rotateJoint(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var angle = getAngle(cursorPosition);
 
-      fixedJoint.rotation = angle;
+      elementImage.rotation = angle;
       angleOfFixedJoint = angle;
     }
 
-    private function onMouseDown(e:MouseEvent)
-    {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doSelectSegment(e);
-          break;
-        case SELECT_POSITION:
-          doSelectPosition();
-          break;
-        case SELECT_ANGLE:
-          doSelectAngle();
-      }
-    }
 
-    private function doSelectSegment(e:MouseEvent)
+    private function selectSegment(e:MouseEvent)
     {
       var angle:Number;
       var p:Point;
       var positionOfJoint:Point;
       if( this.highlightedSegment != null)
       {
-        doNow = SELECT_POSITION;
-        fixedJoint = new FixedJoint();
-        fixedJoint.scaleX = 0.8;
-        fixedJoint.scaleY = 0.8;
-        parent1.addChild(fixedJoint);
+        nextHandlers();
+
+        elementImage = new FixedJoint();
+        elementImage.scaleX = 0.8;
+        elementImage.scaleY = 0.8;
+        parent1.addChild(elementImage);
         highlightedSegment.setColor(0x0);
         positionOfJoint = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
-        fixedJoint.x = positionOfJoint.x;
-        fixedJoint.y = positionOfJoint.y;
+        elementImage.x = positionOfJoint.x;
+        elementImage.y = positionOfJoint.y;
       }
     }
 
-    private function doSelectPosition()
+    private function fixPosition(e:MouseEvent)
     {
-      doNow = SELECT_ANGLE;
+      nextHandlers();
     }
 
-    private function doSelectAngle()
+    private function fixAngle(e:MouseEvent)
     {
-      // убираем всех прослушивателей событий
-      parent1.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-
-      dialogWnd = new EditWindowFixedJoint("","");
-      parent1.addChild(dialogWnd);
-      dialogWnd.x = 400;
-      dialogWnd.y = 300;
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+      releaseEvents();
+      initDialog();
     }
 
-    private function onEndEditInDialogWindow(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(fixedJoint);
-
-      horisontalReaction = dialogWnd.horizontalReaction;
-      verticalReaction = dialogWnd.verticalReaction;
-
-      dialogWnd = null;
-      doCreateFixedJoint();
-      dispatchEvent(new Event(FixedJointCreator.CREATE_DONE));
-    }
-
-    private function doCreateFixedJoint()
-    {
-      var p:Point;
-      var angle:Number;
-      fixedJointContainer = new FixedJointContainer(parent1, this.angleOfFixedJoint);
-      fixedJointContainer.x = this.fixedJointPosition.x;
-      fixedJointContainer.y = this.fixedJointPosition.y;
-      fixedJointContainer.segment = highlightedSegment;
-      fixedJointContainer.horisontalReaction = horisontalReaction;
-      fixedJointContainer.verticalReaction = verticalReaction;
-      fixedJointContainer.pointNumber = this.pointNumber;
-      fixedJointContainer.setCoordOfSignatures();
-
-    }
 
     private function getAngle(cursorPosition:Point):Number
     {
@@ -274,31 +193,32 @@
       return resultAngle;
     }
 
-    private function getPointNumber(pointOnSegment:Point):int
+    private function initDialog()
     {
-      var pointNumber:int = 5000;
-        if(pointOnSegment.equals(highlightedSegment.firstScreenCoord))
-        {
-           pointNumber = highlightedSegment.firstPointNumber;
-        }
-        if(pointOnSegment.equals(highlightedSegment.secondScreenCoord))
-        {
-           pointNumber = highlightedSegment.secondPointNumber;
-        }
-      return pointNumber;
+      dialogWnd = new EditWindowFixedJoint("","");
+      parent1.addChild(dialogWnd);
+      dialogWnd.x = 400;
+      dialogWnd.y = 300;
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    private function onCancelEditInDialogWindow(e:Event)
+    override protected function createObject(data:Object)
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+      var p:Point;
+      var angle:Number;
+      fixedJointContainer = new FixedJointContainer(frame, this.angleOfFixedJoint);
+      fixedJointContainer.x = this.fixedJointPosition.x;
+      fixedJointContainer.y = this.fixedJointPosition.y;
+      fixedJointContainer.segment = highlightedSegment;
 
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(fixedJoint);
+      fixedJointContainer.horisontalReaction = data.hReaction;
+      fixedJointContainer.verticalReaction = data.vReaction;
 
-      dialogWnd = null;
-      dispatchEvent(new Event(FixedJointCreator.CREATE_CANCEL));
+      fixedJointContainer.pointNumber = this.pointNumber;
+      fixedJointContainer.setCoordOfSignatures();
+
     }
+
 
     public function get result():FixedJointContainer
     {

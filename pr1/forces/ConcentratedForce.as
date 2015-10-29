@@ -13,6 +13,7 @@
   import pr1.ComConst;
   import flash.text.Font;
   import pr1.Frame;
+  import pr1.events.DialogEvent;
 
 
   public class ConcentratedForce extends Element
@@ -33,7 +34,7 @@
       this.angleName = angleName;
     }
 
-    private function onMouseClick(e:MouseEvent)
+    override protected function onMouseClick(e:MouseEvent)
     {
       dispatchEvent( new Event(ComConst.LOCK_ALL, true));
       sigPoses.force = new Point(signatures.force.x, signatures.force.y);
@@ -47,7 +48,7 @@
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    
+
     override protected function changeValues(data:Object)
     {
       forceName  = data.forceName;
@@ -56,8 +57,8 @@
       angleValue = data.angleValue;
       units      = data.units;
     }
-    
-    
+
+
     public function setCoordOfForceName(p:Point)
     {
       signatures.force.x = p.x;
@@ -158,12 +159,12 @@
     {
       params.angleSign = sign;
     }
-    
+
     public function get forceNumber():int
     {
       return params.number;
     }
-    
+
     public function set forceNumber(val:int)
     {
       params.number = val;

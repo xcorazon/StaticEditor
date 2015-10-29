@@ -10,17 +10,16 @@ package pr1.windows
 
   public class EditWindow extends Sprite
   {
-  
     public static const DELETE_FORCE:String = "Delete force";
     public static const END_EDIT:String = "End Edit";
     public static const CANCEL_EDIT:String = "Cancel Edit";
-    
+
     protected var backgrnd:MovieClip;
     // окно с ошибкой
     protected var errWindow:Sprite;
     //размерность нагрузки
     protected var _units:ComBox;
-    
+
     protected var _children:Object;
 
     //кнопки
@@ -29,6 +28,7 @@ package pr1.windows
 
     public function EditWindow(value:String = "", name:String = "")
     {
+      _children = new Object();
       var txtFormat:TextFormat = new TextFormat("Arial", 12, 0x0, true);
       addBackground();
       var forceName:TextField = new TextField();
@@ -48,7 +48,7 @@ package pr1.windows
       }
       _children.forceName = forceName;
       addChild(forceName);
-      if(name != null) 
+      if(name != null)
         forceName.text = name;
 
       var forceValue:TextField = new TextField();
@@ -67,7 +67,7 @@ package pr1.windows
       }
       _children.forceValue = forceValue;
       addChild(forceValue);
-      if(value != "") 
+      if(value != "")
         forceValue.text = value;
 
       errWindow = new ErrorDialog();
@@ -90,20 +90,20 @@ package pr1.windows
 
       initEvents()
     }
-    
+
     private function initEvents()
     {
       okButton.addEventListener(MouseEvent.CLICK, onOk);
       cancelButton.addEventListener(MouseEvent.CLICK, onCancel);
     }
-    
+
     private function releaseEvents()
     {
       cancelButton.removeEventListener(MouseEvent.CLICK, onCancel);
       okButton.removeEventListener(MouseEvent.CLICK, onOk);
     }
 
-    
+
     protected function addBackground():void
     {
       backgrnd = new Dialog1();
@@ -111,13 +111,13 @@ package pr1.windows
       addChild(backgrnd);
     }
 
-    
+
     protected function fieldsEmpty():Boolean
     {
       return _children.forceName.length == 0 || _children.forceValue.length == 0;
     }
-    
-    
+
+
     private function endDialog(isCanceled = false)
     {
       var event:DialogEvent = new DialogEvent(DialogEvent.END_DIALOG);
@@ -127,21 +127,21 @@ package pr1.windows
       }
       else
         event.canceled = true;
-        
+
       dispatchEvent(event);
       _units.destroy();
     }
-    
+
     protected function setEventData():Object
     {
       var data:Object = new Object();
       data.forceName = _children.forceName.text;
       data.forceValue = Number(_children.forceValue.text);
       data.units = units;
-      
+
       return data;
     }
-    
+
     private function onOk(e:MouseEvent)
     {
       releaseEvents();
@@ -151,32 +151,36 @@ package pr1.windows
       else
         endDialog();
     }
-    
-    
+
+
     private function onCancel(e:MouseEvent)
     {
       releaseEvents();
       endDialog(true);
     }
-    
-    
+
+
     protected function showError()
     {
       errWindow.addEventListener("EndError", onError);
       addChild(errWindow);
     }
 
-    
+
     protected function onError(e:Event)
     {
       errWindow.removeEventListener("EndError", onError);
       removeChild(errWindow);
       initEvents();
     }
-    
+
     public function get units():String
     {
       return _units.textInBox;
+    }
+
+    public function set units(s:String)
+    {
     }
   }
 }

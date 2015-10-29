@@ -1,34 +1,21 @@
 ﻿package  pr1.Shapes
 {
-  import flash.display.SimpleButton;
-  import flash.display.Sprite;
   import flash.events.MouseEvent;
   import flash.geom.Point;
   import flash.events.Event;
-  import pr1.Shapes.Arrow;
   import pr1.CoordinateTransformation;
   import pr1.ComConst;
   import pr1.windows.EditWindowSealing;
-  import pr1.windows.EditWindow;
-  import pr1.forces.ConcentratedForce;
   import pr1.Snap;
   import pr1.opora.SealingContainer;
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
 
-  public class SealingCreator extends Sprite
+  public class SealingCreator extends Creator
   {
-    // события в объекте
-    public static const CREATE_CANCEL:String = "Cancel creation of sealing";
-    public static const CREATE_DONE:String = "Done creation of sealing";
-    // константы для внутреннего использования
-    private static const SELECT_POINT:int = 0;
-
-    private var parent1:*;
     private var selectedSegment:Segment;
-    private var segments:Array;
     private var snapPoints:Array;
     private var secondSnapPoint:Point = null;
-    private var snap:Snap;
-    private var sealing:Sealing;
 
     // выходные данные
     private var angleOfSealing:Number;
@@ -40,25 +27,23 @@
     //cам элемент защемления в полном виде
     private var sealingContainer:SealingContainer = null;
 
-
-    private var dialogWnd:EditWindowSealing;
-
-    private var doNow:int;
-
-    public function SealingCreator(parent, segments:Array)
+    public function SealingCreator(frame:Frame)
     {
-      this.parent1 = parent;
-      this.segments = segments;
-      this.doNow = SELECT_POINT;
-
+      super(frame);
       snapPoints = new Array();
       getSnapPoints();
-      sealing = new Sealing();
-      parent1.addChild(sealing);
 
-      this.snap = parent1.snap;
-      parent1.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      elementImage = new Sealing();
+      parent1.addChild(elementImage);
+
+      initHandlers();
+      initEvents();
+    }
+
+    private function initHandlers()
+    {
+      moveHandlers[0] = moveSealing;
+      downHandlers[0] = fixPosition;
     }
 
     private function getSnapPoints()
@@ -120,12 +105,8 @@
       }
     }
 
-    private function onMouseMove(e:MouseEvent)
-    {
-      doMoveSealing(e);
-    }
 
-    private function doMoveSealing(e)
+    private function moveSealing(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -134,29 +115,24 @@
         if(Point.distance(cursorPosition, p1) <= thres)
         {
           angle = getAngle(p1);
-          sealing.rotation = angle;
+          elementImage.rotation = angle;
           angleOfSealing = angle;
-          sealing.x = p1.x;
-          sealing.y = p1.y;
+          elementImage.x = p1.x;
+          elementImage.y = p1.y;
           break;
         }
         else
         {
-          sealing.rotation = 0;
+          elementImage.rotation = 0;
           angleOfSealing = 0;
-          sealing.x = cursorPosition.x;
-          sealing.y = cursorPosition.y;
+          elementImage.x = cursorPosition.x;
+          elementImage.y = cursorPosition.y;
         }
       }
     }
 
-    private function onMouseDown(e:MouseEvent)
-    {
-      doSelectPosition(e);
-    }
 
-
-    private function doSelectPosition(e:MouseEvent)
+    private function fixPosition(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -166,61 +142,49 @@
         if(Point.distance(cursorPosition, p1) <= thres)
         {
           angle = getAngle(p1);
-          sealing.rotation = angle;
+          elementImage.rotation = angle;
           angleOfSealing = angle;
-          sealing.x = p1.x;
-          sealing.y = p1.y;
+          elementImage.x = p1.x;
+          elementImage.y = p1.y;
           sealingPosition = p1;
           this.selectedSegment = getSegment(p1);
-          // убираем всех прослушивателей событий
-          parent1.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-          parent1.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 
-          dialogWnd = new EditWindowSealing("","","");
-          parent1.addChild(dialogWnd);
-          dialogWnd.x = 400;
-          dialogWnd.y = 300;
-          dialogWnd.addEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-          dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+          releaseEvents();
+          initDialog();
           break;
         }
         else
         {
-          sealing.rotation = 0;
+          elementImage.rotation = 0;
           angleOfSealing = 0;
-          sealing.x = cursorPosition.x;
-          sealing.y = cursorPosition.y;
+          elementImage.x = cursorPosition.x;
+          elementImage.y = cursorPosition.y;
         }
       }
     }
 
-    private function onEndEditInDialogWindow(e:Event)
+    private function initDialog()
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(sealing);
-
-      horisontalReaction = dialogWnd.horizontalReaction;
-      verticalReaction = dialogWnd.verticalReaction;
-      moment = dialogWnd.moment;
-
-      dialogWnd = null;
-      doCreateSealing();
-      dispatchEvent(new Event(SealingCreator.CREATE_DONE));
+      dialogWnd = new EditWindowSealing("","","");
+      parent1.addChild(dialogWnd);
+      dialogWnd.x = 400;
+      dialogWnd.y = 300;
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    private function doCreateSealing()
+
+    override protected function createObject(data:Object)
     {
       var p:Point;
       var angle:Number;
-      sealingContainer = new SealingContainer(parent1, this.angleOfSealing);
+      sealingContainer = new SealingContainer(frame, this.angleOfSealing);
       sealingContainer.x = this.sealingPosition.x;
       sealingContainer.y = this.sealingPosition.y;
-      sealingContainer.horisontalReaction = horisontalReaction;
-      sealingContainer.verticalReaction = verticalReaction;
-      sealingContainer.moment = moment;
+
+      sealingContainer.horisontalReaction = data.hReaction;
+      sealingContainer.verticalReaction = data.vReaction;
+      sealingContainer.moment = data.moment;
+
       sealingContainer.segment = selectedSegment;
       sealingContainer.pointNumber = getPointNumber(sealingPosition);
       sealingContainer.setCoordOfSignatures();
@@ -285,18 +249,6 @@
         }
       }
       return pointNumber;
-    }
-
-    private function onCancelEditInDialogWindow(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(sealing);
-
-      dialogWnd = null;
-      dispatchEvent(new Event(SealingCreator.CREATE_CANCEL));
     }
 
     public function get result():SealingContainer

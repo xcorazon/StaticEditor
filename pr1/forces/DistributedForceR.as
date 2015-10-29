@@ -29,13 +29,13 @@
                  forceName:String = null)
     {
       super(frame, upState, overState, downState, hitTestState);
-      
+
       this.forceName = forceName;
       firstScreenCoord = new Point(0,0);
       secondScreenCoord = new Point(0,0);
     }
 
-    private function onMouseClick(e:MouseEvent)
+    override protected function onMouseClick(e:MouseEvent)
     {
       dispatchEvent( new Event(ComConst.LOCK_ALL, true));
       sigPoses.name = new Point(signatures.name.x, signatures.name.y);
@@ -47,7 +47,7 @@
       parent1.addChild(dialogWnd);
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-    
+
     override protected function changeValues(data:Object)
     {
       forceName  = data.forceName;
@@ -124,13 +124,13 @@
     {
       return params.secondScrPt.clone();
     }
-    
+
     public function get angleValue():String
     {
       return params.angle;
     }
-    
-    public function set angleValue(ang:String):String
+
+    public function set angleValue(angle:String)
     {
       params.angle = angle;
     }

@@ -1,39 +1,36 @@
 ﻿package  pr1.Shapes
 {
-  import flash.display.SimpleButton;
-  import flash.display.Sprite;
   import flash.events.MouseEvent;
   import flash.geom.Point;
   import flash.events.Event;
-  import pr1.panels.MomentPanel;
+  import flash.display.Shape;
   import pr1.Shapes.RectangularArrowsArray;
   import pr1.CoordinateTransformation;
   import pr1.ComConst;
   import pr1.windows.EditWindowQ;
-  import pr1.windows.EditWindow;
   import pr1.forces.DistributedForceR;
-  import pr1.Snap;
   import pr1.Frame;
+  import pr1.events.DialogEvent;
 
   public class DistributedForceRCreator extends Creator
   {
-    private var forceNumber1:int;
-    private var forceNumber2:int;
+    protected var forceNumber1:int;
+    protected var forceNumber2:int;
     private var highlightedSegment:Segment;
 
     private var arrowsHeight:Number;
     private var arrowsLength:Number;
     private var arrowsCoordinate1:Point;  // координаты стрелок на экране
     private var arrowsCoordinate2:Point;  // координаты стрелок на экране
-    
+
     private var angleValue:String;
 
-    private var button_up:RectangularArrowsArray;
-    private var button_over:RectangularArrowsArray;
-    private var button_down:RectangularArrowsArray;
-    private var button_hit:RectangularArrowsArray;
+    protected var button_up:*;
+    protected var button_over:*;
+    protected var button_down:*;
+    protected var button_hit:*;
     //cам элемент нагрузки в полном виде
-    private var distributedForce:* = null;
+    protected var distributedForce:* = null;
 
 
     public function DistributedForceRCreator(frame:Frame)
@@ -42,13 +39,13 @@
 
       this.segments = segments;
       this.highlightedSegment = null;
-      this.forceNumber1 = lastNonusedForceNumber;
-      this.forceNumber2 = lastNonusedForceNumber + 1;
+      this.forceNumber1 = frame.lastNonUsedDRForce;
+      this.forceNumber2 = frame.lastNonUsedDRForce + 1;
 
       initHandlers();
       initEvents();
     }
-    
+
     private function initHandlers()
     {
       moveHandlers[0] = highlightSegment;
@@ -151,15 +148,20 @@
       }
       trace(height);
 
+      setImage(length, height, angle);
+
+      elementImage.x = arrowsCoordinate1.x;
+      elementImage.y = arrowsCoordinate1.y;
+      parent1.addChild(elementImage);
+    }
+
+    protected function setImage(length:Number, height:Number, angle:Number)
+    {
       elementImage = new RectangularArrowsArray(length, height, angle, 0);
       button_over = new RectangularArrowsArray(length, height, angle, 0xff);
       button_up = new RectangularArrowsArray(length, height, angle, 0);
       button_down = button_up;
       button_hit = button_up;
-
-      elementImage.x = arrowsCoordinate1.x;
-      elementImage.y = arrowsCoordinate1.y;
-      parent1.addChild(elementImage);
     }
 
 
@@ -172,17 +174,22 @@
       {
         p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
         angle = CoordinateTransformation.decartToPolar(p).y;
-        
+
         nextHandlers();
-        
+
         highlightedSegment.setColor(0x0);
         positionOfArrow = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
-        elementImage = new RectangularArrowsArray(10,20,angle,0);
+        elementImage = getImage(angle);
         parent1.addChild(elementImage);
         elementImage.x = positionOfArrow.x;
         elementImage.y = positionOfArrow.y;
         arrowsCoordinate1 = positionOfArrow;
       }
+    }
+
+    protected function getImage(angle:Number):Shape
+    {
+      return new RectangularArrowsArray(10,20,angle,0);
     }
 
     private function fixPosition(){
@@ -197,7 +204,7 @@
       releaseEvents();
       initDialog();
     }
-    
+
     protected function initDialog()
     {
       dialogWnd = new EditWindowQ("","");
@@ -206,23 +213,23 @@
       dialogWnd.y = 300;
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-    
+
     override protected function createObject(data:Object)
     {
-    
+
       var p:Point;
       var angle:Number;
-      distributedForceR = new DistributedForceR(parent1, button_up, button_over, button_down, button_hit, data.forceName);
+      distributedForce = getForce(data.forceName);
 
-      distributedForceR.forceValue = data.forceValue;
-      distributedForceR.units = data.units;
-      distributedForceR.segment = highlightedSegment;
-      
-      distributedForceR.firstScreenCoord = arrowsCoordinate1;
-      distributedForceR.secondScreenCoord = arrowsCoordinate2;
-      distributedForceR.forceNumber1 = this.forceNumber1;
-      distributedForceR.forceNumber2 = this.forceNumber2;
-      distributedForceR.angleValue = this.angleValue;
+      distributedForce.forceValue = data.forceValue;
+      distributedForce.units = data.units;
+      distributedForce.segment = highlightedSegment;
+
+      distributedForce.firstScreenCoord = arrowsCoordinate1;
+      distributedForce.secondScreenCoord = arrowsCoordinate2;
+      distributedForce.forceNumber1 = this.forceNumber1;
+      distributedForce.forceNumber2 = this.forceNumber2;
+      distributedForce.angleValue = this.angleValue;
 
       p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
       angle = CoordinateTransformation.decartToPolar(p).y;
@@ -230,18 +237,21 @@
       p = CoordinateTransformation.rotate(p, angle);
 
       p.y = -p.y;  // преобразуем из дкартовой системы координат в оконную
-      distributedForceR.setCoordOfForceName(p);
-      distributedForceR.x = arrowsCoordinate1.x;
-      distributedForceR.y = arrowsCoordinate1.y;
-    
-      super.createObject(data);
+      distributedForce.setCoordOfForceName(p);
+      distributedForce.x = arrowsCoordinate1.x;
+      distributedForce.y = arrowsCoordinate1.y;
 
-      //dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
+      super.createObject(data);
     }
 
-    public function get result():DistributedForceR
+    protected function getForce(forceName:String):*
     {
-      return distributedForceR;
+      return new DistributedForceR(parent1, button_up, button_over, button_down, button_hit, forceName);
+    }
+
+    public function get result():*
+    {
+      return distributedForce;
     }
   }
 }

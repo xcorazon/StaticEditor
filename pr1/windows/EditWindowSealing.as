@@ -8,10 +8,10 @@ package pr1.windows
   import pr1.EditEvent1;
   import flash.events.*;
   import flash.text.*;
-  
+
   public class EditWindowSealing extends EditWindow
   {
-    
+
     public function EditWindowSealing(horisontalReaction:String, verticalReaction:String, moment:String)
     {
       super();
@@ -19,7 +19,7 @@ package pr1.windows
       removeChild(_children.forceName);
       delete _children["forceValue"];
       delete _children["forceName"];
-      
+
       var txtFormat:TextFormat = new TextFormat("Arial", 12, 0x0, true);
       var hReaction:TextField = new TextField();
       hReaction.x = 160;
@@ -36,8 +36,8 @@ package pr1.windows
       addChild(hReaction);
       _children.hReaction = hReaction;
       if(horisontalReaction != null)
-        hReaction.text = horisontalReaction; 
-      
+        hReaction.text = horisontalReaction;
+
       var vReaction:TextField = new TextField();
       vReaction.x = 160;
       vReaction.y = -30;
@@ -53,7 +53,7 @@ package pr1.windows
       _children.vReaction = vReaction;
       if(verticalReaction != "")
         vReaction.text = String(verticalReaction);
-      
+
       var moment1:TextField = new TextField();
       moment1.x = 160;
       moment1.y = 0;
@@ -69,28 +69,28 @@ package pr1.windows
       _children.moment = moment1;
       if(moment != "")
         moment1.text = String(moment);
-      
+
     }
-    
+
     override protected function addBackground():void
     {
       backgrnd = new SealingDialog();
       backgrnd.stop();
       addChild(backgrnd);
     }
-    
+
     override protected function fieldsEmpty():Boolean
     {
       return _children.hReaction.length == 0 || _children.vReaction.length == 0 || _children.moment.length == 0;
     }
-    
+
     override protected function setEventData():Object
     {
       var data:Object = new Object();
       data.hReaction = _children.hReaction.text;
-      data.cReaction = _children.vReaction.text;
+      data.vReaction = _children.vReaction.text;
       data.moment = _children.moment.text;
-      
+
       return data;
     }
   }

@@ -1,9 +1,21 @@
 ﻿package  pr1.razmers
 {
   import flash.geom.Point;
-  
+  import flash.display.DisplayObject;
+  import pr1.Frame;
+  import pr1.Shapes.Designation;
+
   public class LinearDimensionXContainer extends LinearDimensionYContainer
   {
+    public function LinearDimensionXContainer(frame:Frame, upState:DisplayObject = null,
+                 overState:DisplayObject = null,
+                 downState:DisplayObject = null,
+                 hitTestState:DisplayObject = null,
+                 razmerName:String = null)
+    {
+      super(frame, upState, overState, downState, hitTestState, razmerName);
+    }
+
     override public function setCoordOfRazmerName()
     {
       var width:Number = secondPointDecartCoord.x - firstPointDecartCoord.x;
@@ -16,7 +28,7 @@
       signatures.name.y = p1.y;
     }
 
-    
+
     override public function set razmerName(value:String)
     {
       params.name = value;

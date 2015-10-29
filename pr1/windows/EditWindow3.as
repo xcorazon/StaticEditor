@@ -107,7 +107,7 @@
     }
 
 
-    public function set units(s:String)
+    override public function set units(s:String)
     {
       if( s == "Н")
       {

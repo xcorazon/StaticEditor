@@ -31,6 +31,7 @@
     private var anglePoints:Array;
     private var arrowAngle:Number;
     private var arrowCoordinates:Point;   // координаты стрелки на экране
+    private var angleValue:String;
 
     private var button_up:Arrow;
     private var button_over:Arrow;
@@ -222,7 +223,7 @@
     {
       var p:Point;
       var angle:Number;
-      force = new ConcentratedForce(parent1, button_up, button_over, button_down, button_hit, data.forceName, data.angleName);
+      force = new ConcentratedForce(frame, button_up, button_over, button_down, button_hit, data.forceName, data.angleName);
 
       force.units = data.units;
       force.segment = highlightedSegment;

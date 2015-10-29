@@ -19,22 +19,24 @@
     protected var moveHandlers:Array;
     protected var downHandlers:Array;
 
-    protected var elementImage:Shape; // стрелка, размер, и т.п.
+    protected var elementImage:*; // стрелка, размер, и т.п.
     protected var segments:Array;
 
+    protected var frame:Frame;
     protected var parent1:*;
     protected var snap:Snap;
 
     private var _moveIndex:int;
     private var _downIndex:int;
 
-    private var dialogWnd:EditWindow;
+    protected var dialogWnd:EditWindow;
 
 
     public function Creator(frame:Frame)
     {
       moveHandlers = new Array();
       downHandlers = new Array();
+      this.frame = frame;
       this.parent1 = frame.parent1;
       this.segments = frame.Segments;
       snap = parent1.snap;
@@ -78,7 +80,7 @@
       dialogWnd = null;
     }
 
-    private function onEndDialog(e:DialogEvent)
+    protected function onEndDialog(e:DialogEvent)
     {
       releaseDialog();
 

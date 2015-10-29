@@ -9,7 +9,7 @@ package pr1.windows
 
   public class EditWindowFixedJoint extends EditWindow
   {
-  
+
     public function EditWindowFixedJoint(horisontalReaction:String, verticalReaction:String)
     {
       super();
@@ -17,7 +17,7 @@ package pr1.windows
       removeChild(_children.forceName);
       delete _children["forceValue"];
       delete _children["forceName"];
-      
+
       var txtFormat:TextFormat = new TextFormat("Arial", 12, 0x0, true);
       var hReaction:TextField = new TextField();
       hReaction.x = 160;
@@ -65,13 +65,13 @@ package pr1.windows
     {
       return _children.hReaction.length == 0 || _children.vReaction.length == 0;
     }
-    
+
     override protected function setEventData():Object
     {
       var data:Object = new Object();
       data.hReaction = _children.hReaction.text;
-      data.cReaction = _children.vReaction.text;
-      
+      data.vReaction = _children.vReaction.text;
+
       return data;
     }
   }

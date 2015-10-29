@@ -36,7 +36,7 @@
     }
 
 
-    public function set units(s:String)
+    override public function set units(s:String)
     {
       switch(s){
         case "H/м":

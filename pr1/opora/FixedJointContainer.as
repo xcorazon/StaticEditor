@@ -17,8 +17,8 @@
   import pr1.Shapes.Arrow;
   import pr1.Shapes.Segment;
   import pr1.forces.Element;
-  import pr1.Frame;
   import pr1.events.DialogEvent;
+  import pr1.Frame;
 
 
   public class FixedJointContainer extends Element
@@ -28,7 +28,6 @@
 
     public function FixedJointContainer(frame:Frame, angle)
     {
-
       var upState:FixedJoint = new FixedJoint();
       upState.rotation = angle;
       upState.scaleX = 0.8;
@@ -37,7 +36,7 @@
       overState.scaleX = 0.8;
       overState.scaleY = 0.8;
       overState.rotation = angle;
-      
+
       super(frame, upState, overState, upState, upState);
 
       var hArrow:Arrow = new Arrow(new Point(0,0), 0, new Point(5,0), false, 0xCC0000);
@@ -50,7 +49,7 @@
 
     }
 
-    private function onMouseClick(e:MouseEvent)
+    override protected function onMouseClick(e:MouseEvent)
     {
       sigPoses.hReaction = new Point(signatures.hReaction.x, signatures.hReaction.y);
       sigPoses.vReaction = new Point(signatures.vReaction.x, signatures.vReaction.y);
@@ -61,12 +60,12 @@
       parent1.addChild(dialogWnd);
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-    
+
     override protected function changeValues(data:Object)
     {
       horisontalReaction = data.hReaction;
       verticalReaction   = data.vReaction;
-      
+
       setCoordOfSignatures();
     }
 

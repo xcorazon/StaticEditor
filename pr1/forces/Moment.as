@@ -28,7 +28,7 @@
       isClockWise = false;
     }
 
-    private function onMouseClick(e:MouseEvent)
+    override protected function onMouseClick(e:MouseEvent)
     {
       dispatchEvent( new Event(ComConst.LOCK_ALL, true));
       sigPoses.moment = new Point(signatures.moment.x, signatures.moment.y);

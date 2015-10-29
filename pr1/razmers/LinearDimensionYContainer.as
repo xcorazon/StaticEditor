@@ -46,7 +46,7 @@
       signatures.name.disable();
     }
 
-    private function onMouseClick(e:MouseEvent)
+    override protected function onMouseClick(e:MouseEvent)
     {
       sigPoses.name = new Point(signatures.name.x, signatures.name.y);
 

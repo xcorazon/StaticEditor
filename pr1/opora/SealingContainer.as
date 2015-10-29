@@ -21,19 +21,19 @@
 
     public function SealingContainer(frame:Frame, angle)
     {
-      
+
       var upState:Sealing = new Sealing();
       var overState:Sealing = new Sealing(0xff);
       var hitTestState:Shape = new Shape();
-      
+
       upState.rotation = angle;
       overState.rotation = angle;
-      
+
       hitTestState.graphics.beginFill(0xffffff);
       hitTestState.graphics.drawRect(-10,-40,10,80);
       hitTestState.graphics.endFill();
       hitTestState.rotation = angle;
-      
+
       super(frame, upState, overState, upState, hitTestState);
 
       var hArrow:Arrow = new Arrow(new Point(0,0), 0, new Point(5,0), false, 0xCC0000);
@@ -49,7 +49,7 @@
 
     }
 
-    private function onMouseClick(e:MouseEvent)
+    override protected function onMouseClick(e:MouseEvent)
     {
       sigPoses.hReaction = new Point(signatures.hReaction.x, signatures.hReaction.y);
       sigPoses.vReaction = new Point(signatures.vReaction.x, signatures.vReaction.y);
@@ -62,13 +62,13 @@
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    
+
     override protected function changeValues(data:Object)
     {
       horisontalReaction = data.hReaction;
       verticalReaction   = data.vReaction;
       moment             = data.moment;
-      
+
       setCoordOfSignatures();
     }
 

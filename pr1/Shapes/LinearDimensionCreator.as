@@ -13,6 +13,7 @@
   import pr1.razmers.LinearDimensionContainer;
   import pr1.Snap;
   import pr1.Frame;
+  import pr1.events.DialogEvent;
 
   public class LinearDimensionCreator extends Creator
   {
@@ -23,7 +24,7 @@
     private var secondCoordinate:Point;   // координаты второй точки размера на экране
     private var razmerHeight:Number;
     private var angle1:Number;
-    
+
     private var button_up:LinearDimension;
     private var button_over:LinearDimension;
     private var button_down:LinearDimension;
@@ -41,7 +42,7 @@
       initEvents();
     }
 
-    
+
     private function initHandlers()
     {
       moveHandlers[0] = highlightSegment;
@@ -54,8 +55,8 @@
       downHandlers[2] = selectSecondPoint;
       downHandlers[3] = fixHeight;
     }
-    
-    
+
+
     private function highlightSegment(e)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
@@ -156,9 +157,9 @@
       {
         p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
         this.angle1 = CoordinateTransformation.decartToPolar(p).y;
-        
+
         nextHandlers()
-        
+
         highlightedSegment.setColor(0x0);
         positionOfFirstPoint = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
         positionOfSecondPoint = CoordinateTransformation.localToScreen(new Point(15,0),positionOfFirstPoint, this.angle1);
@@ -182,7 +183,7 @@
         this.elementImage.x = p1.x;
         this.elementImage.y = p1.y;
         firstCoordinate = p1;
-        
+
         nextHandlers();
       }
     }
@@ -211,7 +212,7 @@
       releaseEvents();
       initDialog();
     }
-    
+
     private function initDialog()
     {
       dialogWnd = new EditWindow4("","");
@@ -221,19 +222,19 @@
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    
+
     override protected function createObject(data:Object)
+    {
+      razmer = new LinearDimensionContainer(frame, button_up, button_over, button_down, button_hit, data.name);
+      setValues(razmer, data);
+
+      super.createObject(data);
+    }
+
+    protected function setValues(razmer:*, data:Object)
     {
       var p:Point;
       var angle:Number;
-      razmer = new LinearDimensionContainer(parent1, button_up, button_over, button_down, button_hit, data.name);
-      setValues(razmer, data);
-	  
-      super.createObject(data);
-    }
-    
-    protected function setValues(razmer:*, data:Object)
-    {
       razmer.units = data.units;
       razmer.razmerValue = data.value;
       razmer.razmerName = data.name;

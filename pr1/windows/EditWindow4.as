@@ -81,7 +81,7 @@ package pr1.windows
       return data;
     }
     
-    public function set units(s:String)
+    override public function set units(s:String)
     {
       if( s == "м")
       {

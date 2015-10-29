@@ -62,7 +62,7 @@
     public var opora1:Array;    // опора с одной реакцией (тележка)
     public var opora2:FixedJointContainer;    // опора с двумя реакциями
     public var opora3:SealingContainer;     // опора с тремя реакциями
-    private var lastNonUsedJoint:int;
+    public var lastNonUsedJoint:int;
 
 
     private var mainPanel:MainPanel;
@@ -259,9 +259,9 @@
     private function createTDistributedForce(e:Event)
     {
       lockAllElements();
-      creator = new DistributedForceTCreator(parent1, segments, lastNonUsedDTForce);
-      creator.addEventListener(DistributedForceTCreator.CREATE_DONE, qtCreationDone);
-      creator.addEventListener(DistributedForceTCreator.CREATE_CANCEL, qtCreationCancel);
+      creator = new DistributedForceTCreator(this);
+      creator.addEventListener(Creator.CREATE_DONE, qtCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, qtCreationCancel);
     }
     private function qtCreationDone(e:Event)
     {
@@ -338,7 +338,7 @@
     //создание размера Y
     private function createDimensionY(e:Event){
       lockAllElements();
-      creator = new LinearDimensionCreatorY(parent1, segments);
+      creator = new LinearDimensionCreatorY(this);
       creator.addEventListener(Creator.CREATE_DONE, dimensionYCreationDone);
       creator.addEventListener(Creator.CREATE_CANCEL, dimensionYCreationCancel);
 
@@ -362,69 +362,69 @@
     // создание углового размера
     private function createFreeAngle(e:Event){
       lockAllElements();
-      creator = new AngleDimensionCreator(parent1, segments);
-      creator.addEventListener(AngleDimensionCreator.CREATE_DONE, freeAngleCreationDone);
-      creator.addEventListener(AngleDimensionCreator.CREATE_CANCEL, freeAngleCreationCancel);
+      creator = new AngleDimensionCreator(this);
+      creator.addEventListener(Creator.CREATE_DONE, freeAngleCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, freeAngleCreationCancel);
     }
     private function freeAngleCreationDone(e:Event){
       unlockAllElements();
       updateAngleDimensions(creator.result);
       angles.push(creator.result);
-      creator.removeEventListener(AngleDimensionCreator.CREATE_DONE, freeAngleCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, freeAngleCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(AngleDimensionCreator.CREATE_CANCEL, freeAngleCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, freeAngleCreationCancel);
       mainPanel.setButtonsActiveState();
     }
     private function freeAngleCreationCancel(e:Event){
       unlockAllElements();
-      creator.removeEventListener(AngleDimensionCreator.CREATE_DONE, freeAngleCreationDone);
-      creator.removeEventListener(AngleDimensionCreator.CREATE_CANCEL, freeAngleCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, freeAngleCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, freeAngleCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 
     // создание углового размера относительно оси X
     private function createAngleX(e:Event){
       lockAllElements();
-      creator = new AngleDimensionCreatorX(parent1, segments);
-      creator.addEventListener(AngleDimensionCreatorX.CREATE_DONE, angleXCreationDone);
-      creator.addEventListener(AngleDimensionCreatorX.CREATE_CANCEL, angleXCreationCancel);
+      creator = new AngleDimensionCreatorX(this);
+      creator.addEventListener(Creator.CREATE_DONE, angleXCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, angleXCreationCancel);
     }
     private function angleXCreationDone(e:Event){
       unlockAllElements();
       updateAngleDimensions(creator.result);
       anglesX.push(creator.result);
-      creator.removeEventListener(AngleDimensionCreatorX.CREATE_DONE, angleXCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, angleXCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(AngleDimensionCreatorX.CREATE_CANCEL, angleXCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, angleXCreationCancel);
       mainPanel.setButtonsActiveState();
     }
     private function angleXCreationCancel(e:Event){
       unlockAllElements();
-      creator.removeEventListener(AngleDimensionCreatorX.CREATE_DONE, angleXCreationDone);
-      creator.removeEventListener(AngleDimensionCreatorX.CREATE_CANCEL, angleXCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, angleXCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, angleXCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 
     // создание углового размера относительно оси Y
     private function createAngleY(e:Event){
       lockAllElements();
-      creator = new AngleDimensionCreatorY(parent1, segments);
-      creator.addEventListener(AngleDimensionCreatorY.CREATE_DONE, angleYCreationDone);
-      creator.addEventListener(AngleDimensionCreatorY.CREATE_CANCEL, angleYCreationCancel);
+      creator = new AngleDimensionCreatorY(this);
+      creator.addEventListener(Creator.CREATE_DONE, angleYCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, angleYCreationCancel);
     }
     private function angleYCreationDone(e:Event){
       unlockAllElements();
       updateAngleDimensions(creator.result);
       anglesY.push(creator.result);
-      creator.removeEventListener(AngleDimensionCreatorY.CREATE_DONE, angleYCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, angleYCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(AngleDimensionCreatorY.CREATE_CANCEL, angleYCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, angleYCreationCancel);
       mainPanel.setButtonsActiveState();
     }
     private function angleYCreationCancel(e:Event){
       unlockAllElements();
-      creator.removeEventListener(AngleDimensionCreatorY.CREATE_DONE, angleYCreationDone);
-      creator.removeEventListener(AngleDimensionCreatorY.CREATE_CANCEL, angleYCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, angleYCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, angleYCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 
@@ -456,49 +456,49 @@
     // создание неподвижного шанира
     private function createFixedJoint(e:Event){
       lockAllElements();
-      creator = new FixedJointCreator(parent1, segments, lastNonUsedJoint);
-      creator.addEventListener(FixedJointCreator.CREATE_DONE, fixedJointCreationDone);
-      creator.addEventListener(FixedJointCreator.CREATE_CANCEL, fixedJointCreationCancel);
+      creator = new FixedJointCreator(this);
+      creator.addEventListener(Creator.CREATE_DONE, fixedJointCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, fixedJointCreationCancel);
     }
     private function fixedJointCreationDone(e:Event){
       unlockAllElements();
       opora2 = creator.result;
-      creator.removeEventListener(FixedJointCreator.CREATE_DONE, fixedJointCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, fixedJointCreationDone);
       snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
       parent1.snap = snap1;
       parent1.addChild(creator.result);
-      creator.removeEventListener(FixedJointCreator.CREATE_CANCEL, fixedJointCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, fixedJointCreationCancel);
       mainPanel.setButtonsActiveState();
       lastNonUsedJoint++;
     }
     private function fixedJointCreationCancel(e:Event){
       unlockAllElements();
-      creator.removeEventListener(FixedJointCreator.CREATE_DONE, fixedJointCreationDone);
-      creator.removeEventListener(FixedJointCreator.CREATE_CANCEL, fixedJointCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, fixedJointCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, fixedJointCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 
     //создание заделки
     private function createSealing(e:Event){
       lockAllElements();
-      creator = new SealingCreator(parent1, segments);
-      creator.addEventListener(SealingCreator.CREATE_DONE, sealingCreationDone);
-      creator.addEventListener(SealingCreator.CREATE_CANCEL, sealingCreationCancel);
+      creator = new SealingCreator(this);
+      creator.addEventListener(Creator.CREATE_DONE, sealingCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, sealingCreationCancel);
     }
     private function sealingCreationDone(e:Event){
       unlockAllElements();
       opora3  = creator.result;
-      creator.removeEventListener(SealingCreator.CREATE_DONE, sealingCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, sealingCreationDone);
       snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
       parent1.snap = snap1;
       parent1.addChild(creator.result);
-      creator.removeEventListener(SealingCreator.CREATE_CANCEL, sealingCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, sealingCreationCancel);
       mainPanel.setButtonsActiveState();
     }
     private function sealingCreationCancel(e:Event){
       unlockAllElements();
-      creator.removeEventListener(SealingCreator.CREATE_DONE, sealingCreationDone);
-      creator.removeEventListener(SealingCreator.CREATE_CANCEL, sealingCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, sealingCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, sealingCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 

@@ -12,6 +12,7 @@
   import pr1.forces.*;
   import pr1.opora.*;
   import pr1.Frame;
+  import pr1.events.DialogEvent;
 
   public class LinearDimensionCreatorX extends Creator
   {
@@ -27,7 +28,7 @@
     protected var button_hit:LinearDimension;
     //cам элемент нагрузки в полном виде
     protected var razmer:* = null;
-    
+
     protected var dimAngle:Number;
 
 
@@ -81,7 +82,7 @@
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       parent1.removeChild(elementImage);
 
-      razmerHeight = getHeight();
+      razmerHeight = getHeight(cursorPosition);
 
       elementImage = new LinearDimension(firstCoordinate, secondCoordinate, razmerHeight, dimAngle, 0);
       button_over = new LinearDimension(firstCoordinate, secondCoordinate, razmerHeight, dimAngle, 0xff);
@@ -93,8 +94,8 @@
       elementImage.y = firstCoordinate.y;
       parent1.addChild(elementImage);
     }
-    
-    protected function getHeight():Number
+
+    protected function getHeight(cursorPosition:Point):Number
     {
       return firstCoordinate.y - cursorPosition.y;
     }
@@ -231,14 +232,12 @@
 
     override protected function createObject(data:Object)
     {
-      var p:Point;
-      var angle:Number;
-      razmer = new LinearDimensionXContainer(parent1, button_up, button_over, button_down, button_hit, data.name);
+      razmer = new LinearDimensionXContainer(frame, button_up, button_over, button_down, button_hit, data.name);
       setValues(razmer, data);
-	  
+
       super.createObject(data);
     }
-    
+
     protected function setValues(razmer:*, data:Object)
     {
       razmer.units = data.units;

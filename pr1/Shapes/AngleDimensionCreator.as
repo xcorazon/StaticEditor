@@ -1,42 +1,26 @@
 ﻿package  pr1.Shapes
 {
-  import flash.display.SimpleButton;
-  import flash.display.Sprite;
   import flash.events.MouseEvent;
   import flash.geom.Point;
   import flash.events.Event;
-  import pr1.Shapes.LinearDimension;
   import pr1.CoordinateTransformation;
-  import pr1.ComConst;
   import pr1.windows.EditWindowAngle;
-  import pr1.windows.EditWindow;
   import pr1.razmers.AngleDimensionContainer;
-  import pr1.Snap;
   import pr1.panels.AnglePanel;
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
 
-  public class AngleDimensionCreator extends Sprite
+  public class AngleDimensionCreator extends Creator
   {
-    // события в объекте
-    public static const CREATE_CANCEL:String = "Cancel creation of angle";
-    public static const CREATE_DONE:String = "Done creation of angle";
-    // константы для внутреннего использования
-    private static const SELECT_FIRST_SEGMENT:int = 0;
-    private static const SELECT_SECOND_SEGMENT:int = 1;
-    private static const SELECT_RADIUS:int = 2;
-
-    private var parent1:*;
-    private var segments:Array;
     private var firstHighlightedSegment:Segment;
     private var secondHighlightedSegment:Segment;
-    private var snap:Snap;
-    private var angleDimensionF:AngleDimension;
     private var panel:AnglePanel;
 
     // выходные данные
     private var razmerScreenPosition:Point;
     private var firstSegmentAngle:Number;
     private var pointOfSecondSegment:Point;
-    private var razmerRadius:Number;
+
     private var firstPointNumber:int;
     private var secondPointNumber:int;
     private var thirdPointNumber:int;
@@ -46,8 +30,6 @@
     private var radius:Number;
 
     private var isInnerAngle:Boolean;
-    private var razmerName:String;
-    private var razmerValue:String;
 
     private var button_up:AngleDimension;
     private var button_over:AngleDimension;
@@ -56,40 +38,30 @@
     //cам элемент нагрузки в полном виде
     private var razmer:AngleDimensionContainer = null;
 
-    private var dialogWnd:EditWindowAngle;
 
-    private var doNow:int;
-
-    public function AngleDimensionCreator(parent:*, segments:Array)
+    public function AngleDimensionCreator(frame:Frame)
     {
-      // constructor code
-      this.parent1 = parent;
-      this.segments = segments;
-      this.doNow = SELECT_FIRST_SEGMENT;
+      super(frame);
       this.firstHighlightedSegment = null;
       this.secondHighlightedSegment = null;
 
-      this.snap = parent1.snap;
-      parent1.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      initEvents();
+      initHandlers();
     }
 
-    private function onMouseMove(e:MouseEvent)
+    private function initHandlers()
     {
-      switch(doNow)
-      {
-        case SELECT_FIRST_SEGMENT:
-          doHighlightFirstSegment(e);
-          break;
-        case SELECT_SECOND_SEGMENT:
-          doHighlightSecondSegment(e);
-          break;
-        case SELECT_RADIUS:
-          doMoveRadius(e);
-      }
+      moveHandlers[0] = highlightFirstSegment;
+      moveHandlers[1] = highlightSecondSegment;
+      moveHandlers[2] = selectRadius;
+
+      downHandlers[0] = selectFirstSegment;
+      downHandlers[1] = selectSecondSegment;
+      downHandlers[2] = fixRadius;
     }
 
-    private function doHighlightFirstSegment(e)
+
+    private function highlightFirstSegment(e)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -136,7 +108,7 @@
       }
     }
 
-    private function doHighlightSecondSegment(e)
+    private function highlightSecondSegment(e)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -191,7 +163,7 @@
       }
     }
 
-    private function doMoveRadius(e:MouseEvent)
+    private function selectRadius(e:MouseEvent)
     {
       var p:Point;
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
@@ -203,45 +175,29 @@
         if(angle >= Math.PI*2)
           angle = angle - 2 * Math.PI;
       }
-      this.parent1.removeChild(angleDimensionF);
+      this.parent1.removeChild(elementImage);
 
-      angleDimensionF = new AngleDimension(razmerScreenPosition, angle, this.pointOfSecondSegment, cursorPosition, 0);
+      elementImage = new AngleDimension(razmerScreenPosition, angle, this.pointOfSecondSegment, cursorPosition, 0);
       button_over = new AngleDimension(razmerScreenPosition, angle, this.pointOfSecondSegment, cursorPosition, 0xff);
       button_up = new AngleDimension(razmerScreenPosition, angle, this.pointOfSecondSegment, cursorPosition, 0);
       button_down = button_up;
       button_hit = button_up;
 
-      this.radius = angleDimensionF.radius;
+      this.radius = elementImage.radius;
 
-      angleDimensionF.x = razmerScreenPosition.x;
-      angleDimensionF.y = razmerScreenPosition.y;
-      this.parent1.addChild(angleDimensionF);
+      elementImage.x = razmerScreenPosition.x;
+      elementImage.y = razmerScreenPosition.y;
+      this.parent1.addChild(elementImage);
     }
 
-    private function onMouseDown(e:MouseEvent)
-    {
-      switch(doNow)
-      {
-        case SELECT_FIRST_SEGMENT:
-          doSelectFirstSegment(e);
-          break;
-        case SELECT_SECOND_SEGMENT:
-          doSelectSecondSegment(e);
-          break;
-        case SELECT_RADIUS:
-          doSelectRadius(e);
-      }
-    }
 
-    private function doSelectFirstSegment(e:MouseEvent)
+    private function selectFirstSegment(e:MouseEvent)
     {
       if( this.firstHighlightedSegment != null)
-      {
-        doNow = SELECT_SECOND_SEGMENT;
-      }
+        nextHandlers();
     }
 
-    private function doSelectSecondSegment(e:MouseEvent)
+    private function selectSecondSegment(e:MouseEvent)
     {
       var vector:Point;
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
@@ -301,66 +257,48 @@
         firstHighlightedSegment.setColor(0x0);
         secondHighlightedSegment.setColor(0x0);
 
-        angleDimensionF = new AngleDimension(razmerScreenPosition, firstSegmentAngle, this.pointOfSecondSegment, cursorPosition, 0);
-        this.parent1.addChild(angleDimensionF);
-        angleDimensionF.x = razmerScreenPosition.x;
-        angleDimensionF.y = razmerScreenPosition.y;
+        elementImage = new AngleDimension(razmerScreenPosition, firstSegmentAngle, this.pointOfSecondSegment, cursorPosition, 0);
+        this.parent1.addChild(elementImage);
+        elementImage.x = razmerScreenPosition.x;
+        elementImage.y = razmerScreenPosition.y;
 
         panel = new AnglePanel();
         panel.x = 800-135;
         parent1.addChild(panel);
-        doNow = SELECT_RADIUS;
+        nextHandlers();
       }
     }
 
-    private function doSelectRadius(e:MouseEvent)
+    private function fixRadius(e:MouseEvent)
     {
       // убираем всех прослушивателей событий
-      parent1.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+      releaseEvents();
       parent1.removeChild(panel);
       panel.destroy();
       panel = null;
 
+      initDialog();
+    }
+
+
+    private function initDialog()
+    {
       dialogWnd = new EditWindowAngle("","");
       parent1.addChild(dialogWnd);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-      /*trace("Номер первой точки: ", this.firstPointNumber);
-      trace("Номер второй точки: ", this.secondPointNumber);
-      trace("Номер третьей точки: ", this.thirdPointNumber);
-
-      trace("Координата первой точки: ", this.firstPointScreenCoord.toString());
-      trace("Координата второй точки: ", this.secondPointScreenCoord.toString());
-      trace("Координата третьей точки: ", this.thirdPointScreenCoord.toString());
-      */
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
 
-    private function onEndEditInDialogWindow(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
 
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(angleDimensionF);
-
-      razmerName = dialogWnd.razmer;
-      razmerValue = dialogWnd.value;
-      dialogWnd = null;
-      doCreateAngleDimension();
-      dispatchEvent(new Event(AngleDimensionCreator.CREATE_DONE));
-    }
-
-    private function doCreateAngleDimension()
+    override protected function createObject(data:Object)
     {
       var p:Point;
       var angle:Number;
-      razmer = new AngleDimensionContainer(parent1, button_up, button_over, button_down, button_hit, razmerName);
+      razmer = new AngleDimensionContainer(frame, button_up, button_over, button_down, button_hit, data.name);
 
-      razmer.razmerValue = razmerValue;
-      razmer.razmerName = razmerName;
+      razmer.razmerValue = data.value;
+      razmer.razmerName = data.name;
       razmer.firstPointNumber = this.firstPointNumber;
       razmer.secondPointNumber = this.secondPointNumber;
       razmer.thirdPointNumber = this.thirdPointNumber;
@@ -374,19 +312,10 @@
       razmer.y = razmerScreenPosition.y;
 
       razmer.setCoordOfRazmerName();
+
+      super.createObject(data);
     }
 
-    private function onCancelEditInDialogWindow(e:Event)
-    {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(angleDimensionF);
-
-      dialogWnd = null;
-      dispatchEvent(new Event(LinearDimensionCreator.CREATE_CANCEL));
-    }
 
     private function isAnySegmentNear(seg:Segment):Boolean
     {
