@@ -192,7 +192,7 @@
       return new RectangularArrowsArray(10,20,angle,0);
     }
 
-    private function fixPosition(){
+    private function fixPosition(e:MouseEvent){
       nextHandlers();
     }
 
@@ -246,7 +246,7 @@
 
     protected function getForce(forceName:String):*
     {
-      return new DistributedForceR(parent1, button_up, button_over, button_down, button_hit, forceName);
+      return new DistributedForceR(frame, button_up, button_over, button_down, button_hit, forceName);
     }
 
     public function get result():*

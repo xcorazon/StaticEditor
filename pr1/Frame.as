@@ -172,8 +172,8 @@
     {
       lockAllElements();
       creator = new ConcentratedForceCreator(this);
-      creator.addEventListener(ConcentratedForceCreator.CREATE_DONE, forceCreationDone);
-      creator.addEventListener(ConcentratedForceCreator.CREATE_CANCEL, forceCreationCancel);
+      creator.addEventListener(Creator.CREATE_DONE, forceCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, forceCreationCancel);
     }
     private function forceCreationDone(e:Event)
     {
@@ -182,17 +182,17 @@
       pForces.push(creator.result);
       snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
       parent1.snap = snap1;
-      creator.removeEventListener(ConcentratedForceCreator.CREATE_DONE, forceCreationDone);
+      creator.removeEventListener(Creator.CREATE_DONE, forceCreationDone);
       parent1.addChild(creator.result);
-      creator.removeEventListener(ConcentratedForceCreator.CREATE_CANCEL, forceCreationCancel);
+      creator.removeEventListener(Creator.CREATE_CANCEL, forceCreationCancel);
       mainPanel.setButtonsActiveState();
       lastNonUsedConcentratedForce++;
     }
     private function forceCreationCancel(e:Event)
     {
       unlockAllElements();
-      creator.removeEventListener(ConcentratedForceCreator.CREATE_DONE, forceCreationDone);
-      creator.removeEventListener(ConcentratedForceCreator.CREATE_CANCEL, forceCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, forceCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, forceCreationCancel);
       mainPanel.setButtonsActiveState();
     }
 
@@ -558,13 +558,13 @@
       for each (var distributedForce in distributedForcesR){
         if(distributedForce.forceName == q.forceName){
           distributedForce.forceValue = q.forceValue;
-          distributedForce.dimension = q.dimension;
+          distributedForce.units = q.units;
         }
       }
       for each (distributedForce in distributedForcesT){
         if(distributedForce.forceName == q.forceName){
           distributedForce.forceValue = q.forceValue;
-          distributedForce.dimension = q.dimension;
+          distributedForce.units = q.units;
         }
       }
     }
@@ -572,19 +572,19 @@
       for each (var d in freeDimension){
         if(d.razmerName == dimension.razmerName){
           d.razmerValue = dimension.razmerValue;
-          d.dimension = dimension.dimension;
+          d.units = dimension.units;
         }
       }
       for each (d in dimensionX){
         if(d.razmerName == dimension.razmerName){
           d.razmerValue = dimension.razmerValue;
-          d.dimension = dimension.dimension;
+          d.units = dimension.units;
         }
       }
       for each (d in dimensionY){
         if(d.razmerName == dimension.razmerName){
           d.razmerValue = dimension.razmerValue;
-          d.dimension = dimension.dimension;
+          d.units = dimension.units;
         }
       }
     }

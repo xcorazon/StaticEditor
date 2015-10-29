@@ -163,7 +163,7 @@
       }
     }
 
-    private function fixPosition()
+    private function fixPosition(e:MouseEvent)
     {
       panel = new ConcentratedForcePanel();
       panel.x = 800 - 245;
@@ -178,7 +178,7 @@
       parent1.addChild(panel);
     }
 
-    private function fixAngle()
+    private function fixAngle(e:MouseEvent)
     {
       // убираем всех прослушивателей событий
       panel.removeEventListener(ConcentratedForcePanel.CHANGE_STATE, onChangePanel);
@@ -192,7 +192,7 @@
       anglePoints[1] = this.forceNumber;
       arrowAngle = elementImage.angleOfTipOrTail;
 
-      var angleValue:String = "";
+      angleValue = "";
       if(Math.abs(this.arrowAngle) == Math.PI/2)
       {
         angleValue = "90";

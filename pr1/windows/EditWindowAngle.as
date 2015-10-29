@@ -12,15 +12,15 @@ package pr1.windows
   {
     public function EditWindowAngle(value:String, name:String)
     {
+      addBackground();
       super();
       removeChild(_children.forceValue);
       removeChild(_children.forceName);
       delete _children["forceValue"];
       delete _children["forceName"];
-      
+
       var txtFormat:TextFormat = new TextFormat("Symbol1"/*myFont.fontName*/, 14, 0x0, true);
       var txtFormat1:TextFormat = new TextFormat("Arial", 12, 0x0, true);
-      addBackground();
       var razmerName:TextField = new TextField();
       razmerName.x = 67;
       razmerName.y = -60;
@@ -62,18 +62,18 @@ package pr1.windows
       backgrnd.stop();
       addChild(backgrnd);
     }
-    
+
     override protected function fieldsEmpty():Boolean
     {
       return _children.name.length == 0 || _children.value.length == 0;
     }
-    
+
     override protected function setEventData():Object
     {
       var data:Object = new Object();
       data.name = _children.name.text;
       data.value = Number(_children.value.text);
-      
+
       return data;
     }
   }
