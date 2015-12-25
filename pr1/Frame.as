@@ -965,7 +965,7 @@
       this.timer = new Timer(1000, 1);
       timer.start();
       timer.addEventListener(TimerEvent.TIMER, onTimer);
-        }
+    }
 
     private function onTimer(e:TimerEvent)
     {

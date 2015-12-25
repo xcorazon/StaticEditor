@@ -247,7 +247,7 @@
 				razmer.@type = d.razmerType;
 				razmer.@name = d.razmerName;
 				razmer.@value = d.razmerValue;
-				razmer.@dimension = d.dimension;
+				razmer.@dimension = d.units;
 				var firstPoints:XML = <firstPointsList/>;
 				var secondPoints:XML = <secondPointsList/>
 				

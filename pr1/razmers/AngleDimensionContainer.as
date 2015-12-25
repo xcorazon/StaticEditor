@@ -52,6 +52,8 @@
     {
       razmerName  = data.name;
       razmerValue = data.value;
+      
+      setCoordOfRazmerName();
     }
     
     public function setCoordOfRazmerName()

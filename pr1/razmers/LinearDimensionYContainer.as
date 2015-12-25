@@ -63,6 +63,8 @@
       razmerName  = data.name;
       razmerValue = data.value;
       units       = data.units;
+      
+      setCoordOfRazmerName();
     }
 
     public function setCoordOfRazmerName()
