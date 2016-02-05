@@ -30,6 +30,11 @@
     public function SealingCreator(frame:Frame)
     {
       super(frame);
+    }
+    
+    override public function create()
+    {
+      super.create();
       snapPoints = new Array();
       getSnapPoints();
 
@@ -188,7 +193,8 @@
       sealingContainer.segment = selectedSegment;
       sealingContainer.pointNumber = getPointNumber(sealingPosition);
       sealingContainer.setCoordOfSignatures();
-
+      
+      super.createObject(data);
     }
 
     private function getAngle(pointOnSegment:Point):Number
@@ -251,7 +257,7 @@
       return pointNumber;
     }
 
-    public function get result():SealingContainer
+    override public function get result():*
     {
       return sealingContainer;
     }

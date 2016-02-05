@@ -5,13 +5,12 @@
   import flash.text.*; //TextField;
   import flash.ui.Keyboard;
   import flash.geom.Point;
-  import pr1.Shapes.SegmentCreator;
-  import pr1.Shapes.ConcentratedForceCreator;
   import pr1.forces.*;
   import pr1.razmers.*;
   import pr1.Shapes.MomentCreator;
   import pr1.Shapes.Creator;
-  import pr1.Snap;
+  import pr1.Shapes.SegmentCreator;
+  import pr1.Shapes.ConcentratedForceCreator;
   import pr1.Shapes.DistributedForceRCreator;
   import pr1.Shapes.DistributedForceTCreator;
   import pr1.Shapes.LinearDimensionCreator;
@@ -21,9 +20,10 @@
   import pr1.Shapes.AngleDimensionCreatorX;
   import pr1.Shapes.AngleDimensionCreatorY;
   import pr1.Shapes.SealingCreator;
-  import pr1.opora.*;
   import pr1.Shapes.FixedJointCreator;
   import pr1.Shapes.MovableJointCreator;
+  import pr1.Snap;
+  import pr1.opora.*;
   import pr1.tests.Workspace;
   import com.adobe.images.PNGEncoder;
   import flash.system.Security;
@@ -33,6 +33,7 @@
   import flash.net.*;
   import flash.utils.ByteArray;
   import flash.utils.Timer;
+  import pr1.events.PanelEvent;
 
 
   public class Frame extends Sprite
@@ -40,28 +41,23 @@
     [Embed(source='..\\symbol.ttf', fontName='Symbol1', embedAsCFF='false')]
     const myNewFont:Class;
 
-    private var creator:*;
+    private var creator:Creator;
 
-    public var distributedForcesR:Array;    // массив равномерно распределенных нагрузок
-    public var lastNonUsedDRForce:int;
-    public var distributedForcesT:Array;    // массив треугольно распределенных нагрузок
-    public var lastNonUsedDTForce:int;
-    public var pForces:Array;   // массив сосредоточенных нагрузок
-    public var lastNonUsedConcentratedForce:int;
-    public var mForces:Array;   // массив моментов сил
-    public var lastNonUsedMoment:int;
+    public var qForcesR:Array;
+    public var qForcesT:Array;
+    public var pForces:Array;
+    public var mForces:Array;
 
-    public var dimensionX:Array;    // массив вертикальных размеров
-    public var dimensionY:Array;    // массив горизонтальных размеров
-    public var freeDimension:Array;   // массив свободных размеров
-    public var anglesX:Array;   // массив угловых размеров относительно оси X
-    public var anglesY:Array;   // массив угловых размеров относительно оси Y
-    public var angles:Array;    // массив угловых размеров относительно конструкций (свободных отрезков)
-    public var segments:Array;    // массив отрезков на которых расположены силы
+    public var dimensionsX:Array;
+    public var dimensionsY:Array;
+    public var freeDimensions:Array;
 
-    public var opora1:Array;    // опора с одной реакцией (тележка)
-    public var opora2:FixedJointContainer;    // опора с двумя реакциями
-    public var opora3:SealingContainer;     // опора с тремя реакциями
+    public var angles:Array;
+    public var segments:Array;
+
+    public var opora1:Array;
+    public var opora2:FixedJointContainer;
+    public var opora3:SealingContainer;
     public var lastNonUsedJoint:int;
 
 
@@ -73,7 +69,7 @@
     private var timer:Timer;
     // имя файла для решения
     private var _resolveFileName:String;
-
+    
 
     public function Frame():void
     {
@@ -85,21 +81,16 @@
       //Security.allowDomain("http://teormeh");
       //Security.loadPolicyFile("http://teormeh/crossdomain.xml");
 
-      dimensionX = new Array();
-      dimensionY = new Array();
-      freeDimension = new Array();
-      anglesX = new Array();
-      anglesY = new Array();
+      dimensionsX = new Array();
+      dimensionsY = new Array();
+      freeDimensions = new Array();
+
       angles = new Array();
       pForces = new Array();
-      lastNonUsedConcentratedForce = 1000;
       mForces = new Array();
-      lastNonUsedMoment = 2000;
 
-      distributedForcesR = new Array();
-      lastNonUsedDRForce = 3000;
-      distributedForcesT = new Array();
-      lastNonUsedDTForce = 4000;
+      qForcesR = new Array();
+      qForcesT = new Array();
 
       opora1 = new Array();
       //freeOpora1 = null;
@@ -115,391 +106,78 @@
       addChild(parent1);
       parent1.x = 0;
       parent1.y = 0;
-      snap1 = new Snap(segments, distributedForcesR, distributedForcesT, pForces, joints);
+      snap1 = new Snap(segments, qForcesR, qForcesT, pForces, joints);
       parent1.snap = snap1;
 
       mainPanel = new MainPanel(this);
       outData = new OutDataCreator();
       addChild(mainPanel);
 
-      mainPanel.addEventListener(MainPanel.CREATE_SEGMENT, createSegment);
-      mainPanel.addEventListener(MainPanel.CREATE_C_FORCE, createConcentratedForce);
-      mainPanel.addEventListener(MainPanel.CREATE_M_FORCE, createMoment);
-      mainPanel.addEventListener(MainPanel.CREATE_DR_FORCE, createRDistributedForce);
-      mainPanel.addEventListener(MainPanel.CREATE_DT_FORCE, createTDistributedForce);
-      mainPanel.addEventListener(MainPanel.CREATE_FREE_DIMENSION, createFreeDimension);
-      mainPanel.addEventListener(MainPanel.CREATE_X_DIMENSION, createDimensionX);
-      mainPanel.addEventListener(MainPanel.CREATE_Y_DIMENSION, createDimensionY);
-      mainPanel.addEventListener(MainPanel.CREATE_FREE_ANGLE, createFreeAngle);
-      mainPanel.addEventListener(MainPanel.CREATE_X_ANGLE, createAngleX);
-      mainPanel.addEventListener(MainPanel.CREATE_Y_ANGLE, createAngleY);
-      mainPanel.addEventListener(MainPanel.CREATE_MOVABLE_JOINT, createMovableJoint);
-      mainPanel.addEventListener(MainPanel.CREATE_FIXED_JOINT, createFixedJoint);
-      mainPanel.addEventListener(MainPanel.CREATE_SEALING, createSealing);
+      mainPanel.addEventListener(MainPanel.CREATE_OBJECT, createObject);
       mainPanel.addEventListener(MainPanel.SEND_DATA_TO_SERVER, onSendData);
       addEventListener(ComConst.CHANGE_ELEMENT, onChangeElement);
       addEventListener(ComConst.DELETE_ELEMENT, onDeleteElement);
       addEventListener(ComConst.LOCK_ALL, lockAllElements);
 
     }
-    // создание отрезка
-    private function createSegment(e:Event)
+    
+    private function createObject(e:PanelEvent)
     {
       lockAllElements();
-      creator = new SegmentCreator(parent1, segments);
-      creator.addEventListener(SegmentCreator.CREATE_DONE, segmentCreationDone);
-      creator.addEventListener(SegmentCreator.CANCEL, segmentCreationCancel);
+      creator = e.object;
+	  trace(e.object);
+      creator.addEventListener(Creator.CREATE_DONE, objectCreationDone);
+      creator.addEventListener(Creator.CREATE_CANCEL, removeEvents);
+      creator.create();
     }
-    private function segmentCreationDone(e:Event)
+    
+    private function objectCreationDone(e:Event)
+    {
+      addObject(creator.result);
+      removeEvents(e);
+    }
+    
+    private function removeEvents(e:Event)
     {
       unlockAllElements();
-      segments.push(creator.segment);
-      creator.removeEventListener(SegmentCreator.CREATE_DONE, segmentCreationDone);
-      parent1.addChild(creator.segment);
-      creator.removeEventListener(SegmentCreator.CANCEL, segmentCreationCancel);
+      creator.removeEventListener(Creator.CREATE_DONE, objectCreationDone);
+      creator.removeEventListener(Creator.CREATE_CANCEL, removeEvents);
       mainPanel.setButtonsActiveState();
     }
-    private function segmentCreationCancel(e:Event)
+    
+    private function addObject(obj:*)
     {
-      unlockAllElements();
-      creator.removeEventListener(SegmentCreator.CREATE_DONE, segmentCreationDone);
-      creator.removeEventListener(SegmentCreator.CANCEL, segmentCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание концентрированной нагрузки
-    private function createConcentratedForce(e:Event)
-    {
-      lockAllElements();
-      creator = new ConcentratedForceCreator(this);
-      creator.addEventListener(Creator.CREATE_DONE, forceCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, forceCreationCancel);
-    }
-    private function forceCreationDone(e:Event)
-    {
-      unlockAllElements();
-      updateConcentratedForcesAndAngles(creator.result);
-      pForces.push(creator.result);
-      snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
-      parent1.snap = snap1;
-      creator.removeEventListener(Creator.CREATE_DONE, forceCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, forceCreationCancel);
-      mainPanel.setButtonsActiveState();
-      lastNonUsedConcentratedForce++;
-    }
-    private function forceCreationCancel(e:Event)
-    {
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, forceCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, forceCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание момента сил
-    private function createMoment(e:Event)
-    {
-
-      lockAllElements();
-      creator = new MomentCreator(this);
-      creator.addEventListener(Creator.CREATE_DONE, momentCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, momentCreationCancel);
-    }
-    private function momentCreationDone(e:Event)
-    {
-      unlockAllElements();
-      updateMoments(creator.result);
-      mForces.push(creator.result);
-      snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
-      parent1.snap = snap1;
-      creator.removeEventListener(Creator.CREATE_DONE, momentCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, momentCreationCancel);
-      mainPanel.setButtonsActiveState();
-      lastNonUsedMoment++;
-    }
-    private function momentCreationCancel(e:Event)
-    {
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, momentCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, momentCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание равномерно распределенной нагрузки
-    private function createRDistributedForce(e:Event)
-    {
-      lockAllElements();
-      creator = new DistributedForceRCreator(this);
-      creator.addEventListener(Creator.CREATE_DONE, qrCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, qrCreationCancel);
-    }
-    private function qrCreationDone(e:Event)
-    {
-      unlockAllElements();
-      updateDistributedForces(creator.result);
-      distributedForcesR.push(creator.result);
-      snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
-      parent1.snap = snap1;
-      creator.removeEventListener(Creator.CREATE_DONE, qrCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, qrCreationCancel);
-      mainPanel.setButtonsActiveState();
-      lastNonUsedDRForce += 2;
-    }
-    private function qrCreationCancel(e:Event)
-    {
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, qrCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, qrCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание треугольно распределенной нагрузки
-    private function createTDistributedForce(e:Event)
-    {
-      lockAllElements();
-      creator = new DistributedForceTCreator(this);
-      creator.addEventListener(Creator.CREATE_DONE, qtCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, qtCreationCancel);
-    }
-    private function qtCreationDone(e:Event)
-    {
-      unlockAllElements();
-      updateDistributedForces(creator.result);
-      distributedForcesT.push(creator.result);
-      snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
-      parent1.snap = snap1;
-      creator.removeEventListener(Creator.CREATE_DONE, qtCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, qtCreationCancel);
-      mainPanel.setButtonsActiveState();
-      lastNonUsedDTForce += 2;
-    }
-    private function qtCreationCancel(e:Event)
-    {
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, qtCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, qtCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    //создание размера
-    private function createFreeDimension(e:Event)
-    {
-      lockAllElements();
-      creator = new LinearDimensionCreator(this);
-      creator.addEventListener(Creator.CREATE_DONE, freeDimensionCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, freeDimensionCreationCancel);
-
-    }
-    private function freeDimensionCreationDone(e:Event)
-    {
-      unlockAllElements();
-      updateLinearDimensions(creator.result);
-      freeDimension.push(creator.result);
-      creator.removeEventListener(Creator.CREATE_DONE, freeDimensionCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, freeDimensionCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-    private function freeDimensionCreationCancel(e:Event)
-    {
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, freeDimensionCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, freeDimensionCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    //создание размера X
-    private function createDimensionX(e:Event){
-      lockAllElements();
-      creator = new LinearDimensionCreatorX(this);
-      creator.addEventListener(Creator.CREATE_DONE, dimensionXCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, dimensionXCreationCancel);
-
-    }
-    private function dimensionXCreationDone(e:Event){
-      unlockAllElements();
-      updateLinearDimensions(creator.result);
-      dimensionX.push(creator.result);
-      creator.removeEventListener(Creator.CREATE_DONE, dimensionXCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, dimensionXCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-    private function dimensionXCreationCancel(e:Event){
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, dimensionXCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, dimensionXCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    //создание размера Y
-    private function createDimensionY(e:Event){
-      lockAllElements();
-      creator = new LinearDimensionCreatorY(this);
-      creator.addEventListener(Creator.CREATE_DONE, dimensionYCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, dimensionYCreationCancel);
-
-    }
-    private function dimensionYCreationDone(e:Event){
-      unlockAllElements();
-      updateLinearDimensions(creator.result);
-      dimensionY.push(creator.result);
-      creator.removeEventListener(Creator.CREATE_DONE, dimensionYCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, dimensionYCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-    private function dimensionYCreationCancel(e:Event){
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, dimensionYCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, dimensionYCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание углового размера
-    private function createFreeAngle(e:Event){
-      lockAllElements();
-      creator = new AngleDimensionCreator(this);
-      creator.addEventListener(Creator.CREATE_DONE, freeAngleCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, freeAngleCreationCancel);
-    }
-    private function freeAngleCreationDone(e:Event){
-      unlockAllElements();
-      updateAngleDimensions(creator.result);
-      angles.push(creator.result);
-      creator.removeEventListener(Creator.CREATE_DONE, freeAngleCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, freeAngleCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-    private function freeAngleCreationCancel(e:Event){
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, freeAngleCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, freeAngleCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание углового размера относительно оси X
-    private function createAngleX(e:Event){
-      lockAllElements();
-      creator = new AngleDimensionCreatorX(this);
-      creator.addEventListener(Creator.CREATE_DONE, angleXCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, angleXCreationCancel);
-    }
-    private function angleXCreationDone(e:Event){
-      unlockAllElements();
-      updateAngleDimensions(creator.result);
-      anglesX.push(creator.result);
-      creator.removeEventListener(Creator.CREATE_DONE, angleXCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, angleXCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-    private function angleXCreationCancel(e:Event){
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, angleXCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, angleXCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание углового размера относительно оси Y
-    private function createAngleY(e:Event){
-      lockAllElements();
-      creator = new AngleDimensionCreatorY(this);
-      creator.addEventListener(Creator.CREATE_DONE, angleYCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, angleYCreationCancel);
-    }
-    private function angleYCreationDone(e:Event){
-      unlockAllElements();
-      updateAngleDimensions(creator.result);
-      anglesY.push(creator.result);
-      creator.removeEventListener(Creator.CREATE_DONE, angleYCreationDone);
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, angleYCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-    private function angleYCreationCancel(e:Event){
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, angleYCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, angleYCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание подвижного шанира
-    private function createMovableJoint(e:Event){
-      lockAllElements();
-      creator = new MovableJointCreator(parent1, segments, lastNonUsedJoint);
-      creator.addEventListener(MovableJointCreator.CREATE_DONE, movableJointCreationDone);
-      creator.addEventListener(MovableJointCreator.CREATE_CANCEL, movableJointCreationCancel);
-    }
-    private function movableJointCreationDone(e:Event){
-      unlockAllElements();
-      opora1.push(creator.result);
-      creator.removeEventListener(MovableJointCreator.CREATE_DONE, movableJointCreationDone);
-      snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
-      parent1.snap = snap1;
-      parent1.addChild(creator.result);
-      creator.removeEventListener(MovableJointCreator.CREATE_CANCEL, movableJointCreationCancel);
-      mainPanel.setButtonsActiveState();
-      lastNonUsedJoint++;
-    }
-    private function movableJointCreationCancel(e:Event){
-      unlockAllElements();
-      creator.removeEventListener(MovableJointCreator.CREATE_DONE, movableJointCreationDone);
-      creator.removeEventListener(MovableJointCreator.CREATE_CANCEL, movableJointCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    // создание неподвижного шанира
-    private function createFixedJoint(e:Event){
-      lockAllElements();
-      creator = new FixedJointCreator(this);
-      creator.addEventListener(Creator.CREATE_DONE, fixedJointCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, fixedJointCreationCancel);
-    }
-    private function fixedJointCreationDone(e:Event){
-      unlockAllElements();
-      opora2 = creator.result;
-      creator.removeEventListener(Creator.CREATE_DONE, fixedJointCreationDone);
-      snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
-      parent1.snap = snap1;
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, fixedJointCreationCancel);
-      mainPanel.setButtonsActiveState();
-      lastNonUsedJoint++;
-    }
-    private function fixedJointCreationCancel(e:Event){
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, fixedJointCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, fixedJointCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-
-    //создание заделки
-    private function createSealing(e:Event){
-      lockAllElements();
-      creator = new SealingCreator(this);
-      creator.addEventListener(Creator.CREATE_DONE, sealingCreationDone);
-      creator.addEventListener(Creator.CREATE_CANCEL, sealingCreationCancel);
-    }
-    private function sealingCreationDone(e:Event){
-      unlockAllElements();
-      opora3  = creator.result;
-      creator.removeEventListener(Creator.CREATE_DONE, sealingCreationDone);
-      snap1 = new Snap(segments,distributedForcesR, distributedForcesT, pForces, joints);
-      parent1.snap = snap1;
-      parent1.addChild(creator.result);
-      creator.removeEventListener(Creator.CREATE_CANCEL, sealingCreationCancel);
-      mainPanel.setButtonsActiveState();
-    }
-    private function sealingCreationCancel(e:Event){
-      unlockAllElements();
-      creator.removeEventListener(Creator.CREATE_DONE, sealingCreationDone);
-      creator.removeEventListener(Creator.CREATE_CANCEL, sealingCreationCancel);
-      mainPanel.setButtonsActiveState();
+      parent1.addChild(obj);
+      if (obj is Segment)
+        segments.push(obj);
+      else if (obj is ConcentratedForce)
+        pForces.push(obj);
+      else if (obj is Moment)
+        mForces.push(obj);
+      else if (obj is DistributedForceR)
+        qForcesR.push(obj);
+      else if (obj is DistributedForceT)
+        qForcesT.push(obj);
+      else if (obj is LinearDimensionContainer)
+        freeDimensions.push(obj);
+      else if (obj is LinearDimensionXContainer)
+        dimensionsX.push(obj);
+      else if (obj is LinearDimensionYContainer)
+        dimensionsY.push(obj);
+      else if (obj is AngleDimensionContainer)
+        angles.push(obj);
+      else if (obj is MovableJointContainer)
+      {
+        opora1.push(obj);
+        lastNonUsedJoint++;
+      }
+      else if (obj is FixedJointContainer)
+      {
+        opora2 = obj;
+        lastNonUsedJoint++;
+      }
+      else if (obj is SealingContainer)
+        opora3 = obj;
     }
 
     private function get joints():Array {
@@ -535,16 +213,6 @@
           ang.razmerValue = force.angleValue;
         }
       }
-      for each (ang in anglesX){
-        if(ang.razmerName == force.angleName){
-          ang.razmerValue = force.angleValue;
-        }
-      }
-      for each (ang in anglesY){
-        if(ang.razmerName == force.angleName){
-          ang.razmerValue = force.angleValue;
-        }
-      }
     }
     private function updateMoments(moment:Moment){
       for each ( var m:Moment in mForces){
@@ -555,13 +223,13 @@
       }
     }
     private function updateDistributedForces(q:*){
-      for each (var distributedForce in distributedForcesR){
+      for each (var distributedForce in qForcesR){
         if(distributedForce.forceName == q.forceName){
           distributedForce.forceValue = q.forceValue;
           distributedForce.units = q.units;
         }
       }
-      for each (distributedForce in distributedForcesT){
+      for each (distributedForce in qForcesT){
         if(distributedForce.forceName == q.forceName){
           distributedForce.forceValue = q.forceValue;
           distributedForce.units = q.units;
@@ -569,19 +237,19 @@
       }
     }
     private function updateLinearDimensions(dimension:*){
-      for each (var d in freeDimension){
+      for each (var d in freeDimensions){
         if(d.razmerName == dimension.razmerName){
           d.razmerValue = dimension.razmerValue;
           d.units = dimension.units;
         }
       }
-      for each (d in dimensionX){
+      for each (d in dimensionsX){
         if(d.razmerName == dimension.razmerName){
           d.razmerValue = dimension.razmerValue;
           d.units = dimension.units;
         }
       }
-      for each (d in dimensionY){
+      for each (d in dimensionsY){
         if(d.razmerName == dimension.razmerName){
           d.razmerValue = dimension.razmerValue;
           d.units = dimension.units;
@@ -591,16 +259,6 @@
     private function updateAngleDimensions(angle:*){
       if(angle is MovableJointContainer){
         for each (var ang:AngleDimensionContainer in angles){
-          if(ang.razmerName == angle.angle){
-            ang.razmerValue = angle.angleValue;
-          }
-        }
-        for each (ang in anglesX){
-          if(ang.razmerName == angle.angle){
-            ang.razmerValue = angle.angleValue;
-          }
-        }
-        for each (ang in anglesY){
           if(ang.razmerName == angle.angle){
             ang.razmerValue = angle.angleValue;
           }
@@ -621,16 +279,6 @@
             ang.razmerValue = angle.razmerValue;
           }
         }
-        for each (ang in anglesX){
-          if(ang.razmerName == angle.razmerName){
-            ang.razmerValue = angle.razmerValue;
-          }
-        }
-        for each (ang in anglesY){
-          if(ang.razmerName == angle.razmerName){
-            ang.razmerValue = angle.razmerValue;
-          }
-        }
         for each (f in pForces){
           if(f.angleName == angle.razmerName){
             f.angleValue = angle.razmerValue;
@@ -647,11 +295,11 @@
       for each (var f:ConcentratedForce in pForces){
         if(f.x == screenCoord.x && f.y == screenCoord.y) return;
       }
-      for each (var q1:DistributedForceR in distributedForcesR){
+      for each (var q1:DistributedForceR in qForcesR){
         if(q1.firstScreenCoord.equals(screenCoord) || q1.secondScreenCoord.equals(screenCoord))
           return;
       }
-      for each (var q2:DistributedForceT in distributedForcesT){
+      for each (var q2:DistributedForceT in qForcesT){
         if(q2.firstScreenCoord.equals(screenCoord) || q2.secondScreenCoord.equals(screenCoord))
           return;
       }
@@ -672,40 +320,40 @@
           return;
       }
 
-      for each (var dimF:LinearDimensionContainer in freeDimension){
+      for each (var dimF:LinearDimensionContainer in freeDimensions){
         if(dimF.firstPointScreenCoord.equals(screenCoord) || dimF.secondPointScreenCoord.equals(screenCoord))
           removeDimension(dimF);
       }
-      for each (var dimX:LinearDimensionXContainer in dimensionX){
+      for each (var dimX:LinearDimensionXContainer in dimensionsX){
         if(dimX.firstPointScreenCoord.equals(screenCoord) || dimX.secondPointScreenCoord.equals(screenCoord))
           removeDimension(dimX);
       }
-      for each (var dimY:LinearDimensionYContainer in dimensionY){
+      for each (var dimY:LinearDimensionYContainer in dimensionsY){
         if(dimY.firstPointScreenCoord.equals(screenCoord) || dimY.secondPointScreenCoord.equals(screenCoord))
           removeDimension(dimY);
       }
     }
     private function removeDimension(dim){
-      for (var i in freeDimension){
-        if( dim == freeDimension[i]){
+      for (var i in freeDimensions){
+        if( dim == freeDimensions[i]){
           LinearDimensionContainer(dim).destroy();
           parent1.removeChild(dim);
-          freeDimension.splice(i,1)
+          freeDimensions.splice(i,1)
           return;
         }
       }
-      for ( i in dimensionX){
-        if( dim == dimensionX[i]){
+      for ( i in dimensionsX){
+        if( dim == dimensionsX[i]){
           LinearDimensionXContainer(dim).destroy();
           parent1.removeChild(dim);
-          dimensionX.splice(i,1)
+          dimensionsX.splice(i,1)
         }
       }
-      for ( i in dimensionY){
-        if( dim == dimensionY[i]){
+      for ( i in dimensionsY){
+        if( dim == dimensionsY[i]){
           LinearDimensionYContainer(dim).destroy();
           parent1.removeChild(dim);
-          dimensionY.splice(i,1)
+          dimensionsY.splice(i,1)
         }
       }
     }
@@ -717,25 +365,19 @@
       for each (element in mForces){
         element.lock();
       }
-      for each (element in distributedForcesR){
+      for each (element in qForcesR){
         element.lock();
       }
-      for each (element in distributedForcesT){
+      for each (element in qForcesT){
         element.lock();
       }
-      for each (element in dimensionX){
+      for each (element in dimensionsX){
         element.lock();
       }
-      for each (element in dimensionY){
+      for each (element in dimensionsY){
         element.lock();
       }
-      for each (element in freeDimension){
-        element.lock();
-      }
-      for each (element in anglesX){
-        element.lock();
-      }
-      for each (element in anglesY){
+      for each (element in freeDimensions){
         element.lock();
       }
       for each (element in angles){
@@ -758,25 +400,19 @@
       for each (element in mForces){
         element.unlock();
       }
-      for each (element in distributedForcesR){
+      for each (element in qForcesR){
         element.unlock();
       }
-      for each (element in distributedForcesT){
+      for each (element in qForcesT){
         element.unlock();
       }
-      for each (element in dimensionX){
+      for each (element in dimensionsX){
         element.unlock();
       }
-      for each (element in dimensionY){
+      for each (element in dimensionsY){
         element.unlock();
       }
-      for each (element in freeDimension){
-        element.unlock();
-      }
-      for each (element in anglesX){
-        element.unlock();
-      }
-      for each (element in anglesY){
+      for each (element in freeDimensions){
         element.unlock();
       }
       for each (element in angles){
@@ -820,9 +456,9 @@
         }
       }
       if(e.target is DistributedForceR){
-        for (i in distributedForcesR){
-          if(distributedForcesR[i] == e.target){
-            distributedForcesR.splice(i, 1);
+        for (i in qForcesR){
+          if(qForcesR[i] == e.target){
+            qForcesR.splice(i, 1);
             DistributedForceR(e.target).destroy();
             parent1.removeChild(DistributedForceR(e.target));
             removeExcessDimensions(DistributedForceR(e.target).firstScreenCoord);
@@ -831,9 +467,9 @@
         }
       }
       if(e.target is DistributedForceT){
-        for (i in distributedForcesT){
-          if(distributedForcesT[i] == e.target){
-            distributedForcesT.splice(i, 1);
+        for (i in qForcesT){
+          if(qForcesT[i] == e.target){
+            qForcesT.splice(i, 1);
             DistributedForceT(e.target).destroy();
             parent1.removeChild(DistributedForceT(e.target));
             removeExcessDimensions(DistributedForceT(e.target).firstScreenCoord);
@@ -855,20 +491,6 @@
         for (i in angles){
           if(angles[i] == e.target){
             angles.splice(i, 1);
-            AngleDimensionContainer(e.target).destroy();
-            parent1.removeChild(AngleDimensionContainer(e.target));
-          }
-        }
-        for ( i in anglesX){
-          if(anglesX[i] == e.target){
-            anglesX.splice(i, 1);
-            AngleDimensionContainer(e.target).destroy();
-            parent1.removeChild(AngleDimensionContainer(e.target));
-          }
-        }
-        for (i in anglesY){
-          if(anglesY[i] == e.target){
-            anglesY.splice(i, 1);
             AngleDimensionContainer(e.target).destroy();
             parent1.removeChild(AngleDimensionContainer(e.target));
           }
@@ -980,30 +602,28 @@
       outData.clearLists();
       outData.addPointsListFromSegments(segments);
       outData.addPointsListFromConcentratedForces(pForces);
-      outData.addPointsListFromDistributedForcesR(this.distributedForcesR);
-      outData.addPointsListFromDistributedForcesT(this.distributedForcesT);
+      outData.addPointsListFromDistributedForcesR(this.qForcesR);
+      outData.addPointsListFromDistributedForcesT(this.qForcesT);
       var a:Array = new Array();
       if(opora3 != null) a.push(opora3);
       if(opora2 != null) a.push(opora2);
       a = a.concat(opora1);
       outData.addPointsListFromJoints(a);
 
-      outData.createSegmentsList(segments, pForces,distributedForcesR,distributedForcesT, a);
+      outData.createSegmentsList(segments, pForces,qForcesR,qForcesT, a);
       outData.createCForcesList(this.pForces);
-      outData.createDRForcesList(this.distributedForcesR);
-      outData.createDTForcesList(this.distributedForcesT);
+      outData.createDRForcesList(this.qForcesR);
+      outData.createDTForcesList(this.qForcesT);
       outData.createMomentsList(this.mForces);
 
       a = new Array();
-      a = this.dimensionX;
-      a = a.concat(this.dimensionY);
-      a = a.concat(this.freeDimension);
+      a = this.dimensionsX;
+      a = a.concat(this.dimensionsY);
+      a = a.concat(this.freeDimensions);
       outData.createLinearDimensionsList(a);
 
       a = new Array();
       a = this.angles;
-      a = a.concat(this.anglesX);
-      a = a.concat(this.anglesY);
       outData.createAnglesList(a);
       outData.createJointsList(opora1, opora2, opora3);
       trace(outData.data);

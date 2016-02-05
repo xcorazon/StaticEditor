@@ -91,13 +91,13 @@ package pr1.windows
       initEvents()
     }
 
-    private function initEvents()
+    protected function initEvents()
     {
       okButton.addEventListener(MouseEvent.CLICK, onOk);
       cancelButton.addEventListener(MouseEvent.CLICK, onCancel);
     }
 
-    private function releaseEvents()
+    protected function releaseEvents()
     {
       cancelButton.removeEventListener(MouseEvent.CLICK, onCancel);
       okButton.removeEventListener(MouseEvent.CLICK, onOk);
@@ -122,9 +122,7 @@ package pr1.windows
     {
       var event:DialogEvent = new DialogEvent(DialogEvent.END_DIALOG);
       if (!isCanceled)
-      {
         event.eventData = setEventData();
-      }
       else
         event.canceled = true;
 

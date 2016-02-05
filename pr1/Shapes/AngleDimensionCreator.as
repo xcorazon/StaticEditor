@@ -42,6 +42,11 @@
     public function AngleDimensionCreator(frame:Frame)
     {
       super(frame);
+    }
+    
+    override public function create()
+    {
+      super.create();
       this.firstHighlightedSegment = null;
       this.secondHighlightedSegment = null;
 
@@ -346,7 +351,7 @@
       return false;
     }
 
-    public function get result():AngleDimensionContainer
+    override public function get result():*
     {
       return razmer;
     }

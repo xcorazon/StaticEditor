@@ -34,17 +34,21 @@
 
     public function Creator(frame:Frame)
     {
-      moveHandlers = new Array();
-      downHandlers = new Array();
+
       this.frame = frame;
       this.parent1 = frame.parent1;
       this.segments = frame.Segments;
       snap = parent1.snap;
+      
+      moveHandlers = new Array();
+      downHandlers = new Array();
+    }
 
+    public function create()
+    {
       moveIndex = 0;
       downIndex = 0;
     }
-
 
     protected function initEvents()
     {
@@ -82,6 +86,7 @@
 
     protected function onEndDialog(e:DialogEvent)
     {
+      preEndDialog();
       releaseDialog();
 
       if(e.canceled)
@@ -98,7 +103,12 @@
 
     private function creationCancel()
     {
+      preEndDialog();
       dispatchEvent(new Event(Creator.CREATE_CANCEL));
+    }
+    
+    protected function preEndDialog()
+    {
     }
 
 
@@ -144,5 +154,11 @@
       moveIndex += 1;
       downIndex += 1;
     }
+    
+    public function get result():*
+    {
+      return null;
+    }
+
   }
 }

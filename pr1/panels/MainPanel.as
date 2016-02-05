@@ -4,31 +4,37 @@
   import flash.display.Shape;
   import flash.display.DisplayObject;
   import flash.geom.*;
+  import flash.events.Event;
   import flash.events.MouseEvent;
   import pr1.buttons.PanelButton;
+  import pr1.events.PanelEvent;
   import pr1.Frame;
-  import flash.events.Event;
+  import pr1.Shapes.*;
   import pr1.Shapes.Segment;
+  
+  import pr1.Shapes.MomentCreator;
+  import pr1.Shapes.Creator;
+  import pr1.Shapes.SegmentCreator;
+  import pr1.Shapes.ConcentratedForceCreator;
+  import pr1.Shapes.DistributedForceRCreator;
+  import pr1.Shapes.DistributedForceTCreator;
+  import pr1.Shapes.LinearDimensionCreator;
+  import pr1.Shapes.LinearDimensionCreatorX;
+  import pr1.Shapes.LinearDimensionCreatorY;
+  import pr1.Shapes.AngleDimensionCreator;
+  import pr1.Shapes.AngleDimensionCreatorX;
+  import pr1.Shapes.AngleDimensionCreatorY;
+  import pr1.Shapes.SealingCreator;
+  import pr1.Shapes.FixedJointCreator;
+  import pr1.Shapes.MovableJointCreator;
 
   public class MainPanel extends Sprite
   {
 
-    public static const CREATE_SEGMENT:String = "Create segment";
-    public static const CREATE_C_FORCE:String = "Create concentrated force";
-    public static const CREATE_M_FORCE:String = "Create moment";
-    public static const CREATE_DR_FORCE:String = "Create rectangular distributed force";
-    public static const CREATE_DT_FORCE:String = "Create triangular distributed force";
-    public static const CREATE_FREE_DIMENSION:String = "Create free dimension";
-    public static const CREATE_X_DIMENSION:String = "Create X dimension";
-    public static const CREATE_Y_DIMENSION:String = "Create Y dimension";
-    public static const CREATE_FREE_ANGLE:String = "Create free angle";
-    public static const CREATE_X_ANGLE:String = "Create X angle";
-    public static const CREATE_Y_ANGLE:String = "Create Y angle";
-    public static const CREATE_SEALING:String = "Create sealing";
-    public static const CREATE_FIXED_JOINT:String = "Create fixed joint";
-    public static const CREATE_MOVABLE_JOINT:String = "Create movable joint";
+    public static const CREATE_OBJECT:String = "Create";
     public static const SEND_DATA_TO_SERVER:String = "Send data to server";
 
+    private var createBtns:Array;
     // отрезок
     private var segment:BtnOtrezok;
     // силы
@@ -60,8 +66,9 @@
 
     private var parent1:*;
 
-    public function MainPanel(parent:*)
+    public function MainPanel(parent:Frame)
     {
+      createBtns = new Array();
       // constructor code
       var shape:Shape = new Shape();
       shape.graphics.lineStyle(1, 0x666666);
@@ -76,59 +83,73 @@
 
       segment = new BtnOtrezok();
       segment.parentPanel = this;
-      segment.msgButton = CREATE_SEGMENT;
+      segment.message = new PanelEvent(CREATE_OBJECT, false, false, new SegmentCreator(parent));
+      createBtns.push(segment);
 
       concentratedForce = new BtnForce();
       concentratedForce.parentPanel = this;
-      concentratedForce.msgButton = CREATE_C_FORCE;
+      concentratedForce.message = new PanelEvent(CREATE_OBJECT, false, false, new ConcentratedForceCreator(parent));
+      createBtns.push(concentratedForce);
 
       distributedRForce = new BtnQl();
       distributedRForce.parentPanel = this;
-      distributedRForce.msgButton = CREATE_DR_FORCE;
+      distributedRForce.message = new PanelEvent(CREATE_OBJECT, false, false, new DistributedForceRCreator(parent));
+      createBtns.push(distributedRForce);
 
       distributedTForce = new BtnQmaxl();
       distributedTForce.parentPanel = this;
-      distributedTForce.msgButton = CREATE_DT_FORCE;
+      distributedTForce.message = new PanelEvent(CREATE_OBJECT, false, false, new DistributedForceTCreator(parent));
+      createBtns.push(distributedTForce);
 
       moment = new BtnMoment();
       moment.parentPanel = this;
-      moment.msgButton = CREATE_M_FORCE;
+      moment.message = new PanelEvent(CREATE_OBJECT, false, false, new MomentCreator(parent));
+      createBtns.push(moment);
 
       freeDimension = new BtnRazmer();
       freeDimension.parentPanel = this;
-      freeDimension.msgButton = CREATE_FREE_DIMENSION;
+      freeDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreator(parent));
+      createBtns.push(freeDimension);
 
       xDimension = new BtnRazmerX();
       xDimension.parentPanel = this;
-      xDimension.msgButton = CREATE_X_DIMENSION;
+      xDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreatorX(parent));
+      createBtns.push(xDimension);
 
       yDimension = new BtnRazmerY();
       yDimension.parentPanel = this;
-      yDimension.msgButton = CREATE_Y_DIMENSION;
+      yDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreatorY(parent));
+      createBtns.push(yDimension);
 
       freeAngle = new BtnAngle();
       freeAngle.parentPanel = this;
-      freeAngle.msgButton = CREATE_FREE_ANGLE;
+      freeAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreator(parent));
+      createBtns.push(freeAngle);
 
       xAngle = new BtnAngleX();
       xAngle.parentPanel = this;
-      xAngle.msgButton = CREATE_X_ANGLE;
+      xAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreatorX(parent));
+      createBtns.push(xAngle);
 
       yAngle = new BtnAngleY();
       yAngle.parentPanel = this;
-      yAngle.msgButton = CREATE_Y_ANGLE;
+      yAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreatorY(parent));
+      createBtns.push(yAngle);
 
       movableJoint = new BtnOpora1();
       movableJoint.parentPanel = this;
-      movableJoint.msgButton = CREATE_MOVABLE_JOINT;
+      movableJoint.message = new PanelEvent(CREATE_OBJECT, false, false, new MovableJointCreator(parent));
+      createBtns.push(movableJoint);
 
       sealing = new BtnOpora3();
       sealing.parentPanel = this;
-      sealing.msgButton = CREATE_SEALING;
+      sealing.message = new PanelEvent(CREATE_OBJECT, false, false, new SealingCreator(parent));
+      createBtns.push(sealing);
 
       fixedJoint = new BtnOpora2();
       fixedJoint.parentPanel = this;
-      fixedJoint.msgButton = CREATE_FIXED_JOINT;
+      fixedJoint.message = new PanelEvent(CREATE_OBJECT, false, false, new FixedJointCreator(parent));
+      createBtns.push(fixedJoint);
 
       this.addChild(segment);
       this.addChild(concentratedForce);
@@ -161,21 +182,9 @@
 
 
       setButtonsActiveState();
+      
       addEventListener(MouseEvent.MOUSE_MOVE, onMouseOver);
-      addEventListener(MainPanel.CREATE_SEGMENT, onCreateSegment);
-      addEventListener(MainPanel.CREATE_C_FORCE, onCreateConcentratedForce);
-      addEventListener(MainPanel.CREATE_M_FORCE, onCreateMoment);
-      addEventListener(MainPanel.CREATE_DR_FORCE, onCreateDistributedRForce);
-      addEventListener(MainPanel.CREATE_DT_FORCE, onCreateDistributedTForce);
-      addEventListener(MainPanel.CREATE_FREE_DIMENSION, onCreateFreeDimension);
-      addEventListener(MainPanel.CREATE_X_DIMENSION, onCreateDimensionX);
-      addEventListener(MainPanel.CREATE_Y_DIMENSION, onCreateDimensionY);
-      addEventListener(MainPanel.CREATE_FREE_ANGLE, onCreateFreeAngle);
-      addEventListener(MainPanel.CREATE_X_ANGLE, onCreateAngleX);
-      addEventListener(MainPanel.CREATE_Y_ANGLE, onCreateAngleY);
-      addEventListener(MainPanel.CREATE_MOVABLE_JOINT, onCreateMovableJoint);
-      addEventListener(MainPanel.CREATE_FIXED_JOINT, onCreateFixedJoint);
-      addEventListener(MainPanel.CREATE_SEALING, onCreateSealing);
+      addEventListener(MainPanel.CREATE_OBJECT, onCreate);
       solve.addEventListener(MouseEvent.CLICK, onDoSolve);
     }
 
@@ -494,6 +503,10 @@
       subPanelPresent = false;
     }
 
+	private function onCreate(e:PanelEvent)
+	{
+		
+	}
     private function onCreateSegment(e:Event)
     {
       setButtonsInactiveState();

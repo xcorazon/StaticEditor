@@ -12,8 +12,13 @@
     public function DistributedForceTCreator(frame:Frame)
     {
       super(frame);
-      this.forceNumber1 = frame.lastNonUsedDTForce;
-      this.forceNumber2 = frame.lastNonUsedDTForce + 1;
+      forceNumber1 = 4000 - 1;
+      forceNumber2 = 4000;
+    }
+    
+    override public function create()
+    {
+      super.create();
     }
 
     override protected function setImage(length:Number, height:Number, angle:Number)

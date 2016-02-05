@@ -3,6 +3,7 @@
   import flash.events.*;
   import flash.display.MovieClip;
   import pr1.buttons.PanelButton;
+  import pr1.events.PanelEvent;
 
   public class MomentPanel extends MovieClip
   {
@@ -25,7 +26,7 @@
       // создаем кнопки
       arrowClockWise = new BtnClockWise();
       arrowClockWise.parentPanel = this;
-      arrowClockWise.msgButton = CLOCKWISE_DOWN;
+      arrowClockWise.message = new PanelEvent(CLOCKWISE_DOWN);
       arrowClockWise.x = 15;
       arrowClockWise.y = 13.375;
       arrowClockWise.changeState(PanelButton.DOWN);
@@ -33,7 +34,7 @@
 
       arrowAntiClockWise = new BtnAntiClockWise();
       arrowAntiClockWise.parentPanel = this;
-      arrowAntiClockWise.msgButton = ANTI_CLOCKWISE_DOWN;
+      arrowAntiClockWise.message = new PanelEvent(ANTI_CLOCKWISE_DOWN);
       arrowAntiClockWise.x = 70;
       arrowAntiClockWise.y = 13.375;
       addChild(arrowAntiClockWise);

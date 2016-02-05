@@ -8,6 +8,7 @@
   import pr1.buttons.PanelButton;
   import pr1.ComConst;
   import pr1.CoordinateTransformation;
+  import pr1.events.PanelEvent;
 
   public class ConcentratedForcePanel extends MovieClip
   {
@@ -47,7 +48,7 @@
       // создаем кнопки
       arrowFrom = new BtnArrowFrom();
       arrowFrom.parentPanel = this;
-      arrowFrom.msgButton = ARROW_FROM_DOWN;
+      arrowFrom.message = new PanelEvent(ARROW_FROM_DOWN);
       arrowFrom.x = 5;
       arrowFrom.y = 20;
       arrowFrom.changeState(PanelButton.DOWN);
@@ -55,42 +56,42 @@
 
       arrowTo = new BtnArrowTo();
       arrowTo.parentPanel = this;
-      arrowTo.msgButton = ARROW_TO_DOWN;
+      arrowTo.message = new PanelEvent(ARROW_TO_DOWN);
       arrowTo.x = 5;
       arrowTo.y = 70;
       addChild(arrowTo);
 
       forwardDirectionX = new BtnForwardDirectionX();
       forwardDirectionX.parentPanel = this;
-      forwardDirectionX.msgButton = FORWARD_DIRECTION_X;
+      forwardDirectionX.message = new PanelEvent(FORWARD_DIRECTION_X);
       forwardDirectionX.x = 125;
       forwardDirectionX.y = 20;
       addChild(forwardDirectionX);
 
       reverseDirectionX = new BtnReverseDirectionX();
       reverseDirectionX.parentPanel = this;
-      reverseDirectionX.msgButton = REVERSE_DIRECTION_X;
+      reverseDirectionX.message = new PanelEvent(REVERSE_DIRECTION_X);
       reverseDirectionX.x = 125;
       reverseDirectionX.y = 70;
       addChild(reverseDirectionX);
 
       forwardDirectionY = new BtnForwardDirectionY();
       forwardDirectionY.parentPanel = this;
-      forwardDirectionY.msgButton = FORWARD_DIRECTION_Y;
+      forwardDirectionY.message = new PanelEvent(FORWARD_DIRECTION_Y);
       forwardDirectionY.x = 180;
       forwardDirectionY.y = 20;
       addChild(forwardDirectionY);
 
       reverseDirectionY = new BtnReverseDirectionY();
       reverseDirectionY.parentPanel = this;
-      reverseDirectionY.msgButton = REVERSE_DIRECTION_Y;
+      reverseDirectionY.message = new PanelEvent(REVERSE_DIRECTION_Y);
       reverseDirectionY.x = 180;
       reverseDirectionY.y = 70;
       addChild(reverseDirectionY);
 
       forwardFreeDirection = new BtnForwardFreeDirection();
       forwardFreeDirection.parentPanel = this;
-      forwardFreeDirection.msgButton = FORWARD_FREE_DIRECTION;
+      forwardFreeDirection.message = new PanelEvent(FORWARD_FREE_DIRECTION);
       forwardFreeDirection.x = 70;
       forwardFreeDirection.y = 20;
       forwardFreeDirection.changeState(PanelButton.DOWN)
@@ -98,7 +99,7 @@
 
       reverseFreeDirection = new BtnReverseFreeDirection();
       reverseFreeDirection.parentPanel = this;
-      reverseFreeDirection.msgButton = REVERSE_FREE_DIRECTION;
+      reverseFreeDirection.message = new PanelEvent(REVERSE_FREE_DIRECTION);
       reverseFreeDirection.x = 70;
       reverseFreeDirection.y = 70;
       addChild(reverseFreeDirection);

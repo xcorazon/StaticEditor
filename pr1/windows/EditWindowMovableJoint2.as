@@ -9,40 +9,34 @@ package pr1.windows
   import flash.events.*;
   import flash.text.*;
 
-  public class EditWindowMovableJoint2 extends Sprite
+  public class EditWindowMovableJoint2 extends EditWindow
   {
-    public static const DELETE_OBJECT:String = "Delete object";
-    //текстовые поля для ввода информации
-    private var reaction1:TextField;
+    //public static const DELETE_OBJECT:String = "Delete object";
 
-    // фоновое изображение окна
-    internal var backgrnd:MovieClip;
-    // окно с ошибкой
-    private var errWindow:Sprite;
-
-    //кнопки
-    internal var okButton:SimpleButton;
-    internal var cancelButton:SimpleButton;
-
-    public function EditWindowMovableJoint2(reaction:String)
+    public function EditWindowMovableJoint2(reaction_name:String)
     {
       var txtFormat:TextFormat = new TextFormat("Arial", 12, 0x0, true);
       var txtFormat1:TextFormat = new TextFormat("Symbol", 12, 0x0, true);
       addBackground();
-      reaction1 = new TextField();
-      reaction1.x = 65;
-      reaction1.y = -29.5;
-      reaction1.width = 45;
-      reaction1.height = 20;
-      reaction1.border = true;
-      reaction1.background = true;
-      reaction1.type = TextFieldType.INPUT;
-      reaction1.restrict = "A-Za-z0-9_";
-      reaction1.multiline = false;
-      reaction1.maxChars = 5;
-      reaction1.defaultTextFormat = txtFormat;
-      addChild(reaction1);
-      if(reaction != null) reaction1.text = reaction;
+      var reaction = new TextField();
+      with(reaction)
+      {
+        x = 65;
+        y = -29.5;
+        width = 45;
+        height = 20;
+        border = true;
+        background = true;
+        type = TextFieldType.INPUT;
+        restrict = "A-Za-z0-9_";
+        multiline = false;
+        maxChars = 5;
+        defaultTextFormat = txtFormat;
+      }
+      _children.reaction = reaction
+      addChild(reaction);
+      if(reaction_name != null)
+        reaction.text = reaction_name;
 
       okButton = new OkButton();
       okButton.x = 15;
@@ -62,57 +56,29 @@ package pr1.windows
       errWindow.x = -65;
       errWindow.y = -35;
 
-      okButton.addEventListener(MouseEvent.CLICK, okListener);
-      cancelButton.addEventListener(MouseEvent.CLICK, cancelListener);
-
-      //error_ok_button.addEventListener(MouseEvent.CLICK, errorListener);
+      initEvents();
     }
 
-    internal function addBackground():void
+    override protected function addBackground():void
     {
       backgrnd = new MovableJointDialog2();
       backgrnd.stop();
       addChild(backgrnd);
     }
-
-    public function okListener(e:MouseEvent)
+    
+    override protected function fieldsEmpty():Boolean
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
-
-      if(reaction.length == 0)
-      {
-        // вывести окно с повтором ввода
-        errWindow.addEventListener("EndError", errorListener);
-        addChild(errWindow);
-      }
-      else
-      {
-        // послать сообщение об окончании ввода
-        dispatchEvent(new Event(EditWindow.END_EDIT));
-      }
+      return _children.reaction.length == 0;
     }
-
-    public function cancelListener(e:MouseEvent)
+    
+    override protected function setEventData():Object
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
-      reaction1.text = "";
-
-      dispatchEvent(new Event(EditWindow.CANCEL_EDIT));
-    }
-
-    public function errorListener(e:Event)
-    {
-      errWindow.removeEventListener("EndError", errorListener);
-      okButton.addEventListener(MouseEvent.CLICK, okListener);
-      cancelButton.addEventListener(MouseEvent.CLICK, cancelListener);
-      removeChild(errWindow);
-    }
-
-    public function get reaction():String
-    {
-      return reaction1.text;
+      var data:Object = new Object();
+      data.reaction = _children.reaction.text;
+      data.angle = "";
+      data.angleValue = 0;
+      
+      return data;
     }
   }
 }

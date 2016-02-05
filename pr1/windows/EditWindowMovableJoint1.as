@@ -8,73 +8,74 @@ package pr1.windows
   import flash.events.*;
   import flash.text.*;
 
-  public class EditWindowMovableJoint1 extends Sprite
+  public class EditWindowMovableJoint1 extends EditWindow
   {
     public static const DELETE_OBJECT:String = "Delete object";
-    //текстовые поля для ввода информации
-    private var reaction1:TextField;
-    private var angleName1:TextField;
-    private var angleValue1:TextField;
-    // фоновое изображение окна
-    internal var backgrnd:MovieClip;
-    // окно с ошибкой
-    private var errWindow:Sprite;
 
-    //кнопки
-    internal var okButton:SimpleButton;
-    internal var cancelButton:SimpleButton;
-
-    public function EditWindowMovableJoint1(reaction:String, angle:String, angleValue:String)
+    public function EditWindowMovableJoint1(reaction_name:String, angle:String, angle_value:String)
     {
+      _children = new Object();
       var txtFormat:TextFormat = new TextFormat("Arial", 12, 0x0, true);
       var txtFormat1:TextFormat = new TextFormat("Symbol1", 14, 0x0, true);
       addBackground();
-      reaction1 = new TextField();
-      reaction1.x = 160;
-      reaction1.y = -68.5;
-      reaction1.width = 45;
-      reaction1.height = 20;
-      reaction1.border = true;
-      reaction1.background = true;
-      reaction1.type = TextFieldType.INPUT;
-      reaction1.restrict = "A-Za-z0-9_";
-      reaction1.multiline = false;
-      reaction1.maxChars = 5;
-      reaction1.defaultTextFormat = txtFormat;
-      addChild(reaction1);
-      if(reaction != null)
-        reaction1.text = reaction;
+      var reaction = new TextField();
+      with(reaction)
+      {
+        x = 160;
+        y = -68.5;
+        width = 45;
+        height = 20;
+        border = true;
+        background = true;
+        type = TextFieldType.INPUT;
+        restrict = "A-Za-z0-9_";
+        multiline = false;
+        maxChars = 5;
+        defaultTextFormat = txtFormat;
+      }
+      _children.reaction = reaction;
+      addChild(reaction);
+      if(reaction_name != null)
+        reaction.text = reaction_name;
 
-      angleName1 = new TextField();
-      angleName1.x = 160;
-      angleName1.y = -32.8;
-      angleName1.width = 45;
-      angleName1.height = 20;
-      angleName1.border = true;
-      angleName1.background = true;
-      angleName1.embedFonts = true;
-      angleName1.type = TextFieldType.INPUT;
-      angleName1.defaultTextFormat = txtFormat1;
-      angleName1.restrict = "A-Za-z0-9_";
-      angleName1.multiline = false;
-      addChild(angleName1);
+      var angleName = new TextField();
+      with(angleName)
+      {
+        x = 160;
+        y = -32.8;
+        width = 45;
+        height = 20;
+        border = true;
+        background = true;
+        embedFonts = true;
+        type = TextFieldType.INPUT;
+        defaultTextFormat = txtFormat1;
+        restrict = "A-Za-z0-9_";
+        multiline = false;
+      }
+      _children.angle = angleName;
+      addChild(angleName);
       if(angle != "")
-        angleName1.text = String(angle);
+        angleName.text = String(angle);
 
-      angleValue1 = new TextField();
-      angleValue1.x = 160;
-      angleValue1.y = 1.70;
-      angleValue1.width = 45;
-      angleValue1.height = 20;
-      angleValue1.border = true;
-      angleValue1.background = true;
-      angleValue1.type = TextFieldType.INPUT;
-      angleValue1.defaultTextFormat = txtFormat;
-      angleValue1.restrict = "0-9.";
-      angleValue1.multiline = false;
-      addChild(angleValue1);
+      var angleValue = new TextField();
+      with (angleValue)
+      {
+        x = 160;
+        y = 1.70;
+        width = 45;
+        height = 20;
+        border = true;
+        background = true;
+        type = TextFieldType.INPUT;
+        defaultTextFormat = txtFormat;
+        restrict = "0-9.";
+        multiline = false;
+      }
+      _children.angleValue = angleValue;
+      addChild(angleValue);
       if(angleValue != "")
-        angleValue1.text = angleValue;
+        angleValue.text = angle_value;
 
       okButton = new OkButton();
       okButton.x = 30;
@@ -94,69 +95,29 @@ package pr1.windows
       errWindow.x = -65;
       errWindow.y = -35;
 
-      okButton.addEventListener(MouseEvent.CLICK, okListener);
-      cancelButton.addEventListener(MouseEvent.CLICK, cancelListener);
-
-      //error_ok_button.addEventListener(MouseEvent.CLICK, errorListener);
+      initEvents();
     }
 
-    internal function addBackground():void
+    override protected function addBackground():void
     {
       backgrnd = new MovableJointDialog1();
       backgrnd.stop();
       addChild(backgrnd);
     }
 
-    public function okListener(e:MouseEvent)
+    override protected function fieldsEmpty():Boolean
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
-
-      if(reaction.length == 0 || angleName.length == 0 || angleValue.length == 0)
-      {
-        // вывести окно с повтором ввода
-        errWindow.addEventListener("EndError", errorListener);
-        addChild(errWindow);
-      }
-      else
-      {
-        // послать сообщение об окончании ввода
-        dispatchEvent(new Event(EditWindow.END_EDIT));
-      }
+      return _children.reaction.length == 0 || _children.angleValue.length == 0 || _children.angle.length == 0;
     }
-
-    public function cancelListener(e:MouseEvent)
+    
+    override protected function setEventData():Object
     {
-      cancelButton.removeEventListener(MouseEvent.CLICK, cancelListener);
-      okButton.removeEventListener(MouseEvent.CLICK, okListener);
-      reaction1.text = "";
-      angleName1.text = "";
-      angleValue1.text = "";
-
-      dispatchEvent(new Event(EditWindow.CANCEL_EDIT));
-    }
-
-    public function errorListener(e:Event)
-    {
-      errWindow.removeEventListener("EndError", errorListener);
-      okButton.addEventListener(MouseEvent.CLICK, okListener);
-      cancelButton.addEventListener(MouseEvent.CLICK, cancelListener);
-      removeChild(errWindow);
-    }
-
-    public function get reaction():String
-    {
-      return reaction1.text;
-    }
-
-    public function get angleName():String
-    {
-      return this.angleName1.text;
-    }
-
-    public function get angleValue():String
-    {
-      return this.angleValue1.text;
+      var data:Object = new Object();
+      data.reaction = _children.reaction.text;
+      data.angle = _children.angle.text;
+      data.angleValue = Number(_children.angleValue.text);
+      
+      return data;
     }
   }
 }

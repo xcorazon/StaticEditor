@@ -8,44 +8,35 @@
   import pr1.CoordinateTransformation;
   import pr1.Shapes.Segment;
   import pr1.Snap;
+  import pr1.Frame;
 
 
-  public class SegmentCreator extends Sprite
+  public class SegmentCreator extends Creator
   {
-    public static const CANCEL:String = "Creation Cancel";
-    public static const CREATE_DONE:String = "Creation Done";
-    private static const GET_FIRST_POINT:int = 0;
-    private static const GET_SECOND_POINT:int = 1;
     private static const SNAP_THRESHOLD:Number = 10;
 
     private var firstPointNumber:int;
     private var secondPointNumber:int;
     private var lastPointNumber:int;
-    private var segments:Array;
     private var point1:Point;
     private var point2:Point;
     private var seg:Segment;
     private var segPresent:Boolean = false;
-    private var doNow:int;
-    private var spr:*;    // объект которому принадлежит этот объект
+
     private var circle:Shape;
     private var circlePresent:Boolean = false;
-    private var snap:Snap;
 
-    public function SegmentCreator(spr:*, segments:Array)
+    public function SegmentCreator(frame:Frame)
     {
-      // constructor code
-      super();
-      this.spr = spr;
-      this.segments = segments;
+      super(frame);
       circle = new Shape();
       circle.graphics.lineStyle(0.5, 0xff);
       circle.graphics.drawCircle(0,0,3);
-      this.snap = spr.snap;
-      this.spr.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-      this.spr.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      this.addEventListener(CANCEL, onCancel);
-      doNow = GET_FIRST_POINT;
+    }
+    
+    override public function create()
+    {
+      super.create();
       firstPointNumber = 6;
       secondPointNumber = 7;
       for each ( var s in segments)
@@ -60,27 +51,23 @@
         }
       }
       lastPointNumber = secondPointNumber;
-
+      
+      this.addEventListener(Creator.CREATE_CANCEL, onCancel);
+      
+      initEvents();
+      initHandlers();
     }
 
-    public function get segment():Segment
+    private function initHandlers()
     {
-      return seg;
+      moveHandlers[0] = moveFirstPoint;
+      moveHandlers[1] = moveSecondPoint;
+
+      downHandlers[0] = setFirstPoint;
+      downHandlers[1] = setSecondPoint;
     }
 
-    private function onMouseMove(e:MouseEvent)
-    {
-      switch (doNow)
-      {
-        case GET_FIRST_POINT:
-          doMoveFirstPoint(e);
-          break;
-        case GET_SECOND_POINT:
-          doMoveSecondPoint(e);
-      }
-    }
-
-    private function doMoveFirstPoint(e:MouseEvent)
+    private function moveFirstPoint(e:MouseEvent)
     {
       var p:Point = new Point(e.stageX, e.stageY);
       // делаем привязку к уже существующим отрезкам
@@ -106,19 +93,19 @@
           circle.y = p.y;
           if(!circlePresent)
           {
-            this.spr.addChild(circle);
+            this.parent1.addChild(circle);
             circlePresent = true;
           }
         }
         else if(circlePresent)
         {
           circlePresent = false;
-          this.spr.removeChild(circle);
+          this.parent1.removeChild(circle);
         }
       }
     }
 
-    private function doMoveSecondPoint(e:MouseEvent)
+    private function moveSecondPoint(e:MouseEvent)
     {
       var p:Point = new Point(e.stageX, e.stageY);
 
@@ -148,14 +135,14 @@
           circle.y = p.y;
           if(!circlePresent)
           {
-            this.spr.addChild(circle);
+            parent1.addChild(circle);
             circlePresent = true;
           }
         }
         else if(circlePresent)
         {
           circlePresent = false;
-          this.spr.removeChild(circle);
+          parent1.removeChild(circle);
         }
       }
       if( !circlePresent)
@@ -176,31 +163,19 @@
 
       if(segPresent)
       {
-        this.spr.removeChild(seg);
+        parent1.removeChild(seg);
         seg = new Segment(firstPointNumber, secondPointNumber, point1, p);
-        this.spr.addChild(seg);
+        this.parent1.addChild(seg);
       }
       else
       {
         seg = new Segment(firstPointNumber, secondPointNumber, point1, p);
-        this.spr.addChild(seg);
+        parent1.addChild(seg);
         segPresent = true;
       }
     }
 
-    private function onMouseDown(e:MouseEvent)
-    {
-      switch (doNow)
-      {
-        case GET_FIRST_POINT:
-          doDownFirstPoint(e);
-          break;
-        case GET_SECOND_POINT:
-          doDownSecondPoint(e);
-      }
-    }
-
-    private function doDownFirstPoint(e:MouseEvent)
+    private function setFirstPoint(e:MouseEvent)
     {
       var p:Point = new Point(e.stageX, e.stageY);
       // делаем привязку к уже существующим отрезкам
@@ -229,47 +204,49 @@
       this.point1 = p;
       if(circlePresent)
       {
-        this.spr.removeChild(circle);
+        parent1.removeChild(circle);
         circlePresent = false;
       }
-      doNow = GET_SECOND_POINT;
+      nextHandlers();
     }
 
-    private function doDownSecondPoint(e:MouseEvent)
+    private function setSecondPoint(e:MouseEvent)
     {
       if(segPresent)
       {
-        this.spr.removeChild(seg);
+        parent1.removeChild(seg);
         segPresent = false;
       }
       if(circlePresent)
       {
-        this.spr.removeChild(circle);
+        parent1.removeChild(circle);
       }
-      spr.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-      spr.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      this.removeEventListener(CANCEL, onCancel);
-      dispatchEvent( new Event(CREATE_DONE));
+      this.removeEventListener(Creator.CREATE_CANCEL, onCancel);
+      releaseEvents();
+      dispatchEvent( new Event(Creator.CREATE_DONE));
     }
 
     private function onCancel(e:Event)
     {
-      spr.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-      spr.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      this.removeEventListener(CANCEL, onCancel);
-
+      this.removeEventListener(Creator.CREATE_CANCEL, onCancel);
+      releaseEvents();
       if(segPresent)
       {
-        this.spr.removeChild(seg);
+        this.parent1.removeChild(seg);
         segPresent = false;
         seg = null;
       }
       if(circlePresent)
       {
-        this.spr.removeChild(circle);
+        this.parent1.removeChild(circle);
         circlePresent = false;
         circle = null;
       }
+    }
+
+    override public function get result():*
+    {
+      return seg;
     }
   }
 }

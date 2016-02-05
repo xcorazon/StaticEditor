@@ -20,7 +20,11 @@
     public function LinearDimensionCreatorY(frame:Frame)
     {
       super(frame);
-
+    }
+    
+    override public function create()
+    {
+      super.create();
       parent1.removeChild(elementImage);
       this.elementImage = new LinearDimension(new Point(0,0), new Point(0,-15), -20, Math.PI/2, 0);
       parent1.addChild(elementImage);

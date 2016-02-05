@@ -35,7 +35,11 @@
     public function LinearDimensionCreator(frame:Frame)
     {
       super(frame);
-
+    }
+    
+    override public function create()
+    {
+      super.create();
       this.highlightedSegment = null;
 
       initHandlers();
@@ -258,7 +262,7 @@
       razmer.setCoordOfRazmerName();
     }
 
-    public function get result():LinearDimensionContainer
+    override public function get result():*
     {
       return razmer;
     }

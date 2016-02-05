@@ -4,6 +4,7 @@
   import flash.events.*;
   import flash.display.MovieClip;
   import pr1.buttons.PanelButton;
+  import pr1.events.PanelEvent;
 
   public class AnglePanel extends MovieClip
   {
@@ -26,7 +27,7 @@
       // создаем кнопки
       innerAngle = new BtnInnerAngle();
       innerAngle.parentPanel = this;
-      innerAngle.msgButton = INNER_ANGLE_DOWN;
+      innerAngle.message = new PanelEvent(INNER_ANGLE_DOWN);
       innerAngle.x = 15;
       innerAngle.y = 13.375;
       innerAngle.changeState(PanelButton.DOWN);
@@ -34,7 +35,7 @@
 
       outerAngle = new BtnOuterAngle();
       outerAngle.parentPanel = this;
-      outerAngle.msgButton = OUTER_ANGLE_DOWN;
+      outerAngle.message = new PanelEvent(OUTER_ANGLE_DOWN);
       outerAngle.x = 70;
       outerAngle.y = 13.375;
       addChild(outerAngle);

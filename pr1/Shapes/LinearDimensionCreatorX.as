@@ -35,13 +35,15 @@
     public function LinearDimensionCreatorX(frame:Frame)
     {
       super(frame);
-
+    }
+    
+    override public function create()
+    {
       this.elementImage = new LinearDimension(new Point(0,0), new Point(15,0), -20, 0, 0);
       parent1.addChild(elementImage);
       dimAngle = 0;
-
-      initHandlers();
-      initEvents();
+      
+      super.create();
     }
 
     private function initHandlers()
@@ -255,7 +257,7 @@
       razmer.setCoordOfRazmerName();
     }
 
-    public function get result():*
+    override public function get result():*
     {
       return razmer;
     }

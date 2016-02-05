@@ -1,36 +1,22 @@
 ﻿package  pr1.Shapes
 {
-  import flash.display.SimpleButton;
-  import flash.display.Sprite;
   import flash.events.MouseEvent;
   import flash.geom.Point;
-  import flash.events.Event;
   import pr1.Shapes.Arrow;
   import pr1.CoordinateTransformation;
   import pr1.ComConst;
   import pr1.windows.EditWindowMovableJoint1;
   import pr1.windows.EditWindowMovableJoint2;
   import pr1.windows.EditWindow;
-  import pr1.forces.ConcentratedForce;
   import pr1.Snap;
   import pr1.opora.MovableJointContainer;
   import pr1.panels.MovableJointPanel1;
-
-  public class MovableJointCreator extends Sprite
+  import pr1.Frame;
+  import pr1.events.DialogEvent;
+  
+  public class MovableJointCreator extends Creator
   {
-    // события в объекте
-    public static const CREATE_CANCEL:String = "Cancel creation of sealing";
-    public static const CREATE_DONE:String = "Done creation of sealing";
-    // константы для внутреннего использования
-    private static const SELECT_SEGMENT:int = 0;
-    private static const SELECT_POSITION:int = 1;
-    private static const SELECT_ANGLE:int = 2;
-
-    private var parent1:*;
-    private var segments:Array;
-    private var snap:Snap;
     private var movableJoint:MovableJoint;
-    private var arrow:Arrow;
     private var isAnglePresent:Boolean = false;
     private var highlightedSegment:Segment;
     private var panel:MovableJointPanel1;
@@ -44,9 +30,7 @@
     private var angleOfMovableJoint:Number;
     private var angleOfAxis:Number;
     private var pointNumber:int;
-    private var movableJointPosition:Point;
-    private var reaction:String;
-    private var angleName:String;
+    private var jointPos:Point;
     private var angleValue:String;
     private var angleSign:int;
     private var upState:MovableJoint;
@@ -55,26 +39,19 @@
     private var hitTestState:MovableJoint;
 
     //cам элемент подвижного шарнира в полном виде
-    private var movableJointContainer:MovableJointContainer = null;
+    private var joint:MovableJointContainer = null;
 
-
-    private var dialogWnd:*;
-
-    private var doNow:int;
-
-    public function MovableJointCreator(parent, segments:Array, lastNonUsedjoint:int)
+    public function MovableJointCreator(frame:Frame)
     {
-      this.parent1 = parent;
-      this.segments = segments;
-      this.doNow = SELECT_SEGMENT;
+      super(frame);
+    }
+    
+    override public function create()
+    {
+      this.pointNumber = this.frame.lastNonUsedJoint;
       this.thirdPointOfAngle = 4;
-      this.pointNumber = lastNonUsedjoint;
-
       this.angleValue = "90";
-      this.snap = parent1.snap;
-      parent1.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-
+      
       this.upState = new MovableJoint();;
       this.upState.scaleX = 0.9;
       this.upState.scaleY = 0.9;
@@ -83,24 +60,23 @@
       this.overState.scaleY = 0.9;
       this.downState = upState;
       this.hitTestState = this.upState;
+      
+      initHandlers();
+      initEvents();
     }
-
-    private function onMouseMove(e:MouseEvent)
+    
+    private function initHandlers()
     {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doHighlightSegment(e);
-          break;
-        case SELECT_POSITION:
-          doMoveJoint(e);
-          break;
-        case SELECT_ANGLE:
-          doRotateJoint(e);
-      }
+      moveHandlers[0] = highlightSegment;
+      moveHandlers[1] = moveJoint;
+      moveHandlers[2] = rotateJoint;
+
+      downHandlers[0] = selectSegment;
+      downHandlers[1] = fixPosition;
+      downHandlers[2] = fixAngle;
     }
 
-    private function doHighlightSegment(e)
+    private function highlightSegment(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var thres:Number = 8;
@@ -144,7 +120,7 @@
       }
     }
 
-    private function doMoveJoint(e:MouseEvent)
+    private function moveJoint(e:MouseEvent)
     {
       var p:Point;
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
@@ -152,18 +128,18 @@
       p = snap.doSnapToForce(p, highlightedSegment);
       this.movableJoint.x = p.x;
       this.movableJoint.y = p.y;
-      movableJointPosition = p;
+      jointPos = p;
     }
 
-    private function doRotateJoint(e:MouseEvent)
+    private function rotateJoint(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
       var angle = getAngle(cursorPosition);// !!!в этой функции будет изменена одна из координат cursorPosition
       var angleOfSide:Number;
       var angleOfSegment:Number;
-      var arrowTip:Point = movableJointPosition.clone();
-      var vec:Point = cursorPosition.subtract(movableJointPosition);
-      arrowTip = movableJointPosition.subtract(vec);
+      var arrowTip:Point = jointPos.clone();
+      var vec:Point = cursorPosition.subtract(jointPos);
+      arrowTip = jointPos.subtract(vec);
 
       secondPointOfAngle = this.pointNumber;
 
@@ -172,19 +148,19 @@
         angleOfSide = 0; //angle * Math.PI/180;
         firstPointOfAngle = 0;
         this.angleOfAxis = 0;
-        if(movableJointPosition.x == cursorPosition.x)
+        if(jointPos.x == cursorPosition.x)
         {
           angleValue = "90";
-          if(cursorPosition.y - movableJointPosition.y >= 0)
+          if(cursorPosition.y - jointPos.y >= 0)
           {
             angleSign = 1;
           }
           else
             angleSign = -1;
         }
-        if(movableJointPosition.y == cursorPosition.y)
+        if(jointPos.y == cursorPosition.y)
         {
-          if(cursorPosition.x - movableJointPosition.x >= 0)
+          if(cursorPosition.x - jointPos.x >= 0)
           {
             angleValue = "180";
           }
@@ -222,42 +198,26 @@
       this.overState.rotation = angle;
       this.downState = upState;
       this.hitTestState = this.upState;
-      parent1.removeChild(arrow);
-      arrow = new Arrow(movableJointPosition, angleOfSide, arrowTip, false, 0xCC0000);
+      parent1.removeChild(elementImage);
+      elementImage = new Arrow(jointPos, angleOfSide, arrowTip, false, 0xCC0000);
       if(angleValue == null)
       {
-        angleSign = arrow.angleSign;
-        angleValue = (Math.abs(arrow.angleOfTipOrTail)*180/Math.PI).toFixed(0);
+        angleSign = elementImage.angleSign;
+        angleValue = (Math.abs(elementImage.angleOfTipOrTail)*180/Math.PI).toFixed(0);
       }
 
-      arrow.x = movableJointPosition.x;
-      arrow.y = movableJointPosition.y;
-      parent1.addChild(arrow);
+      elementImage.x = jointPos.x;
+      elementImage.y = jointPos.y;
+      parent1.addChild(elementImage);
     }
 
-    private function onMouseDown(e:MouseEvent)
-    {
-      switch(doNow)
-      {
-        case SELECT_SEGMENT:
-          doSelectSegment(e);
-          break;
-        case SELECT_POSITION:
-          doSelectPosition();
-          break;
-        case SELECT_ANGLE:
-          doSelectAngle();
-      }
-    }
-
-    private function doSelectSegment(e:MouseEvent)
+    private function selectSegment(e:MouseEvent)
     {
       var angle:Number;
       var p:Point;
       var positionOfJoint:Point;
       if( this.highlightedSegment != null)
       {
-        doNow = SELECT_POSITION;
         movableJoint = new MovableJoint();
         movableJoint.scaleX = 0.9;
         movableJoint.scaleY = 0.9;
@@ -266,104 +226,89 @@
         positionOfJoint = snap.doSnapToSegment( new Point(e.stageX, e.stageY), highlightedSegment);
         movableJoint.x = positionOfJoint.x;
         movableJoint.y = positionOfJoint.y;
+        
+        nextHandlers();
       }
     }
 
-    private function doSelectPosition()
+    private function fixPosition(e:MouseEvent)
     {
-      arrow = new Arrow(movableJointPosition, Math.PI/2, new Point(movableJointPosition.x, movableJointPosition.y-20), false, 0xCC0000);
+      elementImage = new Arrow(jointPos, Math.PI/2, new Point(jointPos.x, jointPos.y-20), false, 0xCC0000);
 
-      arrow.x = movableJointPosition.x;
-      arrow.y = movableJointPosition.y;
-      parent1.addChild(arrow);
+      elementImage.x = jointPos.x;
+      elementImage.y = jointPos.y;
+      parent1.addChild(elementImage);
       panel = new MovableJointPanel1();
       panel.x = 800-135;
       parent1.addChild(panel);
       var p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
       var angle = CoordinateTransformation.decartToPolar(p).y;
       panel.angleOfAxis = angle;
-      doNow = SELECT_ANGLE;
+      
+      nextHandlers();
     }
 
-    private function doSelectAngle()
+    private function fixAngle(e:MouseEvent)
     {
       // убираем всех прослушивателей событий
-      parent1.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-      parent1.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-
+      releaseEvents();
+      
       parent1.removeChild(panel);
       panel.destroy();
-
-      angleSign = arrow.angleSign;
-
+      
+      angleSign = elementImage.angleSign;
+      initDialog();
+    }
+    
+    private function initDialog()
+    {
       if(this.isAnglePresent)
-      {
         dialogWnd = new EditWindowMovableJoint1("","","");
-      }
       else
-      {
         dialogWnd = new EditWindowMovableJoint2("");
-      }
+      
       parent1.addChild(dialogWnd);
       dialogWnd.x = 400;
       dialogWnd.y = 300;
-      dialogWnd.addEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.addEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+      dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
     }
-
-    private function onEndEditInDialogWindow(e:Event)
+    
+    override protected function createObject(data:Object)
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
+      joint = new MovableJointContainer(parent1, this.upState, this.overState, this.downState, hitTestState, elementImage);
+      joint.reaction = data.reaction;
+      joint.angleSign = this.angleSign;
+      if(this.isAnglePresent)
+      {
+        joint.angle = data.angle;
+        angleValue = data.angleValue;
+      }
+      joint.angleValue = angleValue;
+      joint.firstPointOfAngle = this.firstPointOfAngle;
+      joint.secondPointOfAngle = this.secondPointOfAngle;
+      joint.thirdPointOfAngle = this.thirdPointOfAngle;
+      joint.isAnglePresent = this.isAnglePresent;
+      joint.pointNumber = this.pointNumber;
 
-      parent1.removeChild(dialogWnd);
+      joint.angleOfAxis = this.angleOfAxis;
+      joint.angleOfMovableJoint = Math.abs(elementImage.angleOfTipOrTail);
+
+      joint.segment = this.highlightedSegment;
+      joint.setCoordOfSignatures();
+      joint.x = this.jointPos.x;
+      joint.y = this.jointPos.y;
+      
+      super.createObject(data);
+    }
+    
+    override protected function preEndDialog()
+    {
       parent1.removeChild(movableJoint);
-      parent1.removeChild(arrow);
-      if(this.isAnglePresent)
-      {
-        reaction = dialogWnd.reaction;
-        this.angleName = dialogWnd.angleName;
-        this.angleValue = dialogWnd.angleValue;
-      }
-      else
-      {
-        reaction = dialogWnd.reaction;
-      }
-
-      dialogWnd = null;
-      doCreateMovableJoint();
-      dispatchEvent(new Event(MovableJointCreator.CREATE_DONE));
     }
 
-    private function doCreateMovableJoint()
-    {
-      movableJointContainer = new MovableJointContainer(parent1, this.upState, this.overState, this.downState, hitTestState, arrow);
-      movableJointContainer.reaction = this.reaction;
-      movableJointContainer.angleSign = this.angleSign;
-      if(this.isAnglePresent)
-      {
-        movableJointContainer.angle = this.angleName;
-      }
-      movableJointContainer.angleValue = this.angleValue;
-      movableJointContainer.firstPointOfAngle = this.firstPointOfAngle;
-      movableJointContainer.secondPointOfAngle = this.secondPointOfAngle;
-      movableJointContainer.thirdPointOfAngle = this.thirdPointOfAngle;
-      movableJointContainer.isAnglePresent = this.isAnglePresent;
-      movableJointContainer.pointNumber = this.pointNumber;
-
-      movableJointContainer.angleOfAxis = this.angleOfAxis;
-      movableJointContainer.angleOfMovableJoint = Math.abs(arrow.angleOfTipOrTail);
-
-      movableJointContainer.segment = this.highlightedSegment;
-      movableJointContainer.setCoordOfSignatures();
-      movableJointContainer.x = this.movableJointPosition.x;
-      movableJointContainer.y = this.movableJointPosition.y;
-
-    }
 
     private function getAngle(cursorPosition:Point):Number
     {
-      var localSnap:uint = 1;
       var verticalSnap:uint = 2;
       var horisontalSnap:uint = 3;
       var resultPoint:Point;
@@ -372,41 +317,43 @@
       var localAngle = CoordinateTransformation.decartToPolar(p).y;
       var snap:uint = 0;
 
-      var localPoint:Point = CoordinateTransformation.screenToLocal(cursorPosition, movableJointPosition, localAngle);
+      var localPoint:Point = CoordinateTransformation.screenToLocal(cursorPosition, jointPos, localAngle);
       // получаем наименьшую привязку
-      if (Math.abs(localPoint.x) <= 10)
-      {
-        snap = localSnap;
-      }
-      if(Math.abs(cursorPosition.x - movableJointPosition.x) <= 10)
-      {
-        snap = verticalSnap;
-      }
-      if(Math.abs(cursorPosition.y - movableJointPosition.y) <= 10)
-      {
-        snap = horisontalSnap;
-      }
-      p = cursorPosition.subtract(movableJointPosition);
-      p = CoordinateTransformation.screenToLocal(p,new Point(0,0), 0);
-      resultAngle = -CoordinateTransformation.decartToPolar(p).y * 180/Math.PI - 90;
-      isAnglePresent = true;
-      if(snap == localSnap)
+      if (Math.abs(localPoint.x) <= 10 )
       {
         localPoint.x = 0;
         isAnglePresent = false;
         if(localPoint.y <= 0)
-        {
-          resultAngle = -(localAngle * 180/Math.PI);
-        }
+          return -(localAngle * 180/Math.PI);
         else
-        {
-          resultAngle = -(180 + localAngle * 180/Math.PI);
-        }
+          return -(180 + localAngle * 180/Math.PI);
       }
-      else if(snap == verticalSnap)
+      if (Math.abs(localPoint.y) <=10)
+      {
+        localPoint.y = 0;
+        isAnglePresent = false;
+        if(localPoint.x <= 0)
+          return 180;
+        else
+          return 0;
+      }
+      
+      if(Math.abs(cursorPosition.x - jointPos.x) <= 10)
+      {
+        snap = verticalSnap;
+      }
+      if(Math.abs(cursorPosition.y - jointPos.y) <= 10)
+      {
+        snap = horisontalSnap;
+      }
+      p = cursorPosition.subtract(jointPos);
+      p = CoordinateTransformation.screenToLocal(p,new Point(0,0), 0);
+      resultAngle = -CoordinateTransformation.decartToPolar(p).y * 180/Math.PI - 90;
+      isAnglePresent = true;
+      if(snap == verticalSnap)
       {
         isAnglePresent = false;
-        if(cursorPosition.y - movableJointPosition.y >= 0)
+        if(cursorPosition.y - jointPos.y >= 0)
         {
           resultAngle = 0;
         }
@@ -414,13 +361,13 @@
         {
           resultAngle = 180 ;
         }
-        cursorPosition.x = movableJointPosition.x;
+        cursorPosition.x = jointPos.x;
 
       }
       else if(snap == horisontalSnap)
       {
         isAnglePresent = false;
-        if(cursorPosition.x - movableJointPosition.x >= 0)
+        if(cursorPosition.x - jointPos.x >= 0)
         {
           resultAngle = -90;
         }
@@ -428,28 +375,14 @@
         {
           resultAngle = 90;
         }
-        cursorPosition.y = movableJointPosition.y;
+        cursorPosition.y = jointPos.y;
       }
       return resultAngle;
     }
 
-
-    private function onCancelEditInDialogWindow(e:Event)
+    override public function get result():*
     {
-      dialogWnd.removeEventListener(EditWindow.END_EDIT, onEndEditInDialogWindow);
-      dialogWnd.removeEventListener(EditWindow.CANCEL_EDIT, onCancelEditInDialogWindow);
-
-      parent1.removeChild(dialogWnd);
-      parent1.removeChild(movableJoint);
-      parent1.removeChild(arrow);
-
-      dialogWnd = null;
-      dispatchEvent(new Event(MovableJointCreator.CREATE_CANCEL));
-    }
-
-    public function get result():MovableJointContainer
-    {
-      return movableJointContainer;
+      return joint;
     }
   }
 }

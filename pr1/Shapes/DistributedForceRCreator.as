@@ -36,11 +36,18 @@
     public function DistributedForceRCreator(frame:Frame)
     {
       super(frame);
+      forceNumber1 = 3000 - 1;
+      forceNumber2 = 3000;
+    }
+    
+    override public function create()
+    {
+      super.create();
 
-      this.segments = segments;
+      this.segments = frame.segments;
       this.highlightedSegment = null;
-      this.forceNumber1 = frame.lastNonUsedDRForce;
-      this.forceNumber2 = frame.lastNonUsedDRForce + 1;
+      forceNumber1 += 2;
+      forceNumber2 += 2;
 
       initHandlers();
       initEvents();
@@ -249,7 +256,7 @@
       return new DistributedForceR(frame, button_up, button_over, button_down, button_hit, forceName);
     }
 
-    public function get result():*
+    override public function get result():*
     {
       return distributedForce;
     }

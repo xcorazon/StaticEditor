@@ -25,6 +25,12 @@
     public function FixedJointCreator(frame:Frame)
     {
       super(frame);
+    }
+    
+    override public function create()
+    {
+      super.create();
+    
       this.pointNumber = frame.lastNonUsedJoint;
 
       initEvents();
@@ -221,7 +227,7 @@
     }
 
 
-    public function get result():FixedJointContainer
+    override public function get result():*
     {
       return fixedJointContainer;
     }

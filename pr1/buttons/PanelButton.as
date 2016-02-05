@@ -4,6 +4,7 @@
 	import flash.display.DisplayObject;
 	import flash.events.MouseEvent;
 	import flash.events.Event;
+  import pr1.events.PanelEvent;
 	
 	public class PanelButton extends SimpleButton {
 		public static const DOWN:int = 0;
@@ -17,7 +18,7 @@
 		private var hitTestStateCpy:DisplayObject;
 		
 		private var parent1;
-		private var messageToParent:String;
+		private var _message:PanelEvent;
 		
 		public function PanelButton(upState:DisplayObject = null,
 									overState:DisplayObject = null,
@@ -40,8 +41,8 @@
 			parent1 = p;
 		}
 		
-		public function set msgButton(msg:String){
-			messageToParent = msg;
+		public function set message(msg:PanelEvent){
+			_message = msg;
 		}
 		
 		public function changeState(st:int){
@@ -70,7 +71,7 @@
 		
 		private function onMouseDown(e:MouseEvent) {
 			e.stopPropagation();
-			parent1.dispatchEvent(new Event(messageToParent));
+			parent1.dispatchEvent(_message.clone());
 		}
 		
 		private function onMouseMove(e:MouseEvent){

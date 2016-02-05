@@ -44,9 +44,15 @@
     public function ConcentratedForceCreator(frame:Frame)
     {
       super(frame);
-
+      forceNumber = 1000 - 1;
+    }
+    
+    override public function create()
+    {
+      super.create();
       this.highlightedSegment = null;
-      this.forceNumber = frame.lastNonUsedConcentratedForce;
+      forceNumber++;
+      isTail = false;
 
       initEvents();
       initHandlers();
@@ -249,7 +255,7 @@
       //dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
-    public function get result():ConcentratedForce
+    override public function get result():*
     {
       return force;
     }

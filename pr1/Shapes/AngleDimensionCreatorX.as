@@ -42,10 +42,13 @@
     public function AngleDimensionCreatorX(frame:Frame)
     {
       super(frame);
-      this.highlightedSegment = null;
-
       FIRST_POINT_NUM = ComConst.OX_PLUS;
-
+    }
+    
+    override public function create()
+    {
+      super.create();
+      this.highlightedSegment = null;
       initEvents();
       initHandlers();
     }
@@ -226,7 +229,7 @@
     }
 
 
-    public function get result():AngleDimensionContainer
+    override public function get result():*
     {
       return razmer;
     }

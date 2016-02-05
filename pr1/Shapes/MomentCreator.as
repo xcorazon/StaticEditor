@@ -23,8 +23,8 @@
   public class MomentCreator extends Creator
   {
     // события в объекте
-    public static const CREATE_CANCEL:String = "Cancel creation of moment";
-    public static const CREATE_DONE:String = "Done creation of moment";
+    //public static const CREATE_CANCEL:String = "Cancel creation of moment";
+    //public static const CREATE_DONE:String = "Done creation of moment";
 
     private var momentNumber:int;
     private var highlightedSegment:Segment;
@@ -45,9 +45,17 @@
 
     public function MomentCreator(frame:Frame)
     {
+    
       super(frame);
+      momentNumber = 2000 - 1;
+    }
+    
+    override public function create()
+    {
+      super.create();
+      
       this.highlightedSegment = null;
-      this.momentNumber = frame.lastNonUsedMoment;
+      momentNumber++;
 
       initHandlers();
       initEvents();
@@ -214,7 +222,7 @@
       //dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
-    public function get result():Moment
+    override public function get result():*
     {
       return moment;
     }
