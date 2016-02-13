@@ -39,9 +39,9 @@
     protected var FIRST_POINT_NUM:int;
 
 
-    public function AngleDimensionCreatorX(frame:Frame)
+    public function AngleDimensionCreatorX()
     {
-      super(frame);
+      super();
       FIRST_POINT_NUM = ComConst.OX_PLUS;
     }
     
@@ -206,7 +206,7 @@
     {
       var p:Point;
       var angle:Number;
-      razmer = new AngleDimensionContainer(frame, button_up, button_over, button_down, button_hit, data.name);
+      razmer = new AngleDimensionContainer(Frame.Instance, button_up, button_over, button_down, button_hit, data.name);
 
       razmer.razmerValue = data.value;
       razmer.razmerName = data.name;

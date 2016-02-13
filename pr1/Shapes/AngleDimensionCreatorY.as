@@ -6,9 +6,9 @@
   public class AngleDimensionCreatorY extends AngleDimensionCreatorX
   {
 
-    public function AngleDimensionCreatorY(frame:Frame)
+    public function AngleDimensionCreatorY()
     {
-      super(frame);
+      super();
       FIRST_POINT_NUM = ComConst.OY_PLUS;
     }
 

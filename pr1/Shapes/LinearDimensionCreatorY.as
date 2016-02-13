@@ -17,9 +17,9 @@
 
   public class LinearDimensionCreatorY extends LinearDimensionCreatorX
   {
-    public function LinearDimensionCreatorY(frame:Frame)
+    public function LinearDimensionCreatorY()
     {
-      super(frame);
+      super();
     }
     
     override public function create()
@@ -41,7 +41,7 @@
     {
       var p:Point;
       var angle:Number;
-      razmer = new LinearDimensionYContainer(frame, button_up, button_over, button_down, button_hit, data.name);
+      razmer = new LinearDimensionYContainer(Frame.Instance, button_up, button_over, button_down, button_hit, data.name);
       setValues(razmer, data);
 
       dispatchEvent(new Event(Creator.CREATE_DONE));

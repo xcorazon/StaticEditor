@@ -27,9 +27,9 @@
     //cам элемент защемления в полном виде
     private var sealingContainer:SealingContainer = null;
 
-    public function SealingCreator(frame:Frame)
+    public function SealingCreator()
     {
-      super(frame);
+      super();
     }
     
     override public function create()
@@ -182,7 +182,7 @@
     {
       var p:Point;
       var angle:Number;
-      sealingContainer = new SealingContainer(frame, this.angleOfSealing);
+      sealingContainer = new SealingContainer(Frame.Instance, this.angleOfSealing);
       sealingContainer.x = this.sealingPosition.x;
       sealingContainer.y = this.sealingPosition.y;
 

@@ -39,9 +39,9 @@
     private var razmer:AngleDimensionContainer = null;
 
 
-    public function AngleDimensionCreator(frame:Frame)
+    public function AngleDimensionCreator()
     {
-      super(frame);
+      super();
     }
     
     override public function create()
@@ -300,7 +300,7 @@
     {
       var p:Point;
       var angle:Number;
-      razmer = new AngleDimensionContainer(frame, button_up, button_over, button_down, button_hit, data.name);
+      razmer = new AngleDimensionContainer(Frame.Instance, button_up, button_over, button_down, button_hit, data.name);
 
       razmer.razmerValue = data.value;
       razmer.razmerName = data.name;

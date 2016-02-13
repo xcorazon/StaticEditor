@@ -36,7 +36,7 @@
   import pr1.events.PanelEvent;
 
 
-  public class Frame extends Sprite
+  public final class Frame extends Sprite
   {
     [Embed(source='..\\symbol.ttf', fontName='Symbol1', embedAsCFF='false')]
     const myNewFont:Class;
@@ -70,10 +70,14 @@
     // имя файла для решения
     private var _resolveFileName:String;
     
+    private static var _instance:Frame;
 
-    public function Frame():void
+    public function Frame()
     {
-
+      if(_instance)
+        throw new Error("Singleton Frame... use getInstance()");
+        
+      _instance = this;
       Security.allowDomain("http://teormeh.com");
       Security.loadPolicyFile("http://teormeh.com/crossdomain.xml");
 
@@ -109,7 +113,7 @@
       snap1 = new Snap(segments, qForcesR, qForcesT, pForces, joints);
       parent1.snap = snap1;
 
-      mainPanel = new MainPanel(this);
+      mainPanel = new MainPanel();
       outData = new OutDataCreator();
       addChild(mainPanel);
 
@@ -118,14 +122,22 @@
       addEventListener(ComConst.CHANGE_ELEMENT, onChangeElement);
       addEventListener(ComConst.DELETE_ELEMENT, onDeleteElement);
       addEventListener(ComConst.LOCK_ALL, lockAllElements);
-
     }
     
+    public static function get Instance():Frame
+    {
+      if(!_instance)
+      {
+        new Frame();
+      } 
+      return _instance;
+    }
+
     private function createObject(e:PanelEvent)
     {
       lockAllElements();
       creator = e.object;
-	  trace(e.object);
+      trace(e.object);
       creator.addEventListener(Creator.CREATE_DONE, objectCreationDone);
       creator.addEventListener(Creator.CREATE_CANCEL, removeEvents);
       creator.create();

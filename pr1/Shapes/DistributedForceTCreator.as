@@ -9,9 +9,9 @@
   public class DistributedForceTCreator extends DistributedForceRCreator
   {
 
-    public function DistributedForceTCreator(frame:Frame)
+    public function DistributedForceTCreator()
     {
-      super(frame);
+      super();
       forceNumber1 = 4000 - 1;
       forceNumber2 = 4000;
     }
@@ -37,7 +37,7 @@
     
     override protected function getForce(forceName:String):*
     {
-      return new DistributedForceT(frame, button_up, button_over, button_down, button_hit, forceName);
+      return new DistributedForceT(Frame.Instance, button_up, button_over, button_down, button_hit, forceName);
     }
   }
 }

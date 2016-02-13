@@ -41,9 +41,9 @@
     private var force:ConcentratedForce = null;
 
 
-    public function ConcentratedForceCreator(frame:Frame)
+    public function ConcentratedForceCreator()
     {
-      super(frame);
+      super();
       forceNumber = 1000 - 1;
     }
     
@@ -229,7 +229,7 @@
     {
       var p:Point;
       var angle:Number;
-      force = new ConcentratedForce(frame, button_up, button_over, button_down, button_hit, data.forceName, data.angleName);
+      force = new ConcentratedForce(Frame.Instance, button_up, button_over, button_down, button_hit, data.forceName, data.angleName);
 
       force.units = data.units;
       force.segment = highlightedSegment;

@@ -22,7 +22,6 @@
     protected var elementImage:*; // стрелка, размер, и т.п.
     protected var segments:Array;
 
-    protected var frame:Frame;
     protected var parent1:*;
     protected var snap:Snap;
 
@@ -32,12 +31,10 @@
     protected var dialogWnd:EditWindow;
 
 
-    public function Creator(frame:Frame)
+    public function Creator()
     {
-
-      this.frame = frame;
-      this.parent1 = frame.parent1;
-      this.segments = frame.Segments;
+      this.parent1 = Frame.Instance.parent1;
+      this.segments = Frame.Instance.Segments;
       snap = parent1.snap;
       
       moveHandlers = new Array();

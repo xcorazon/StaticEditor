@@ -41,14 +41,14 @@
     //cам элемент подвижного шарнира в полном виде
     private var joint:MovableJointContainer = null;
 
-    public function MovableJointCreator(frame:Frame)
+    public function MovableJointCreator()
     {
-      super(frame);
+      super();
     }
     
     override public function create()
     {
-      this.pointNumber = this.frame.lastNonUsedJoint;
+      this.pointNumber = Frame.Instance.lastNonUsedJoint;
       this.thirdPointOfAngle = 4;
       this.angleValue = "90";
       

@@ -32,9 +32,9 @@
     //cам элемент нагрузки в полном виде
     private var razmer:LinearDimensionContainer = null;
 
-    public function LinearDimensionCreator(frame:Frame)
+    public function LinearDimensionCreator()
     {
-      super(frame);
+      super();
     }
     
     override public function create()
@@ -229,7 +229,7 @@
 
     override protected function createObject(data:Object)
     {
-      razmer = new LinearDimensionContainer(frame, button_up, button_over, button_down, button_hit, data.name);
+      razmer = new LinearDimensionContainer(Frame.Instance, button_up, button_over, button_down, button_hit, data.name);
       setValues(razmer, data);
 
       super.createObject(data);

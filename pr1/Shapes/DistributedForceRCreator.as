@@ -33,9 +33,10 @@
     protected var distributedForce:* = null;
 
 
-    public function DistributedForceRCreator(frame:Frame)
+    public function DistributedForceRCreator()
     {
-      super(frame);
+      super();
+      this.segments = Frame.Instance.segments;
       forceNumber1 = 3000 - 1;
       forceNumber2 = 3000;
     }
@@ -43,8 +44,7 @@
     override public function create()
     {
       super.create();
-
-      this.segments = frame.segments;
+      
       this.highlightedSegment = null;
       forceNumber1 += 2;
       forceNumber2 += 2;
@@ -223,7 +223,6 @@
 
     override protected function createObject(data:Object)
     {
-
       var p:Point;
       var angle:Number;
       distributedForce = getForce(data.forceName);
@@ -240,7 +239,10 @@
 
       p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
       angle = CoordinateTransformation.decartToPolar(p).y;
-      p = new Point(arrowsLength/2, arrowsHeight);
+      
+      // временно расчет координаты подписи нагрузки q
+      var coef = arrowsHeight >= 0 ? 1 : 0;
+      p = new Point(arrowsLength/2, arrowsHeight + coef * 23);
       p = CoordinateTransformation.rotate(p, angle);
 
       p.y = -p.y;  // преобразуем из дкартовой системы координат в оконную
@@ -253,7 +255,7 @@
 
     protected function getForce(forceName:String):*
     {
-      return new DistributedForceR(frame, button_up, button_over, button_down, button_hit, forceName);
+      return new DistributedForceR(Frame.Instance, button_up, button_over, button_down, button_hit, forceName);
     }
 
     override public function get result():*

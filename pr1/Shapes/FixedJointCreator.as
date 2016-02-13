@@ -22,16 +22,16 @@
     private var fixedJointContainer:FixedJointContainer = null;
 
 
-    public function FixedJointCreator(frame:Frame)
+    public function FixedJointCreator()
     {
-      super(frame);
+      super();
     }
     
     override public function create()
     {
       super.create();
     
-      this.pointNumber = frame.lastNonUsedJoint;
+      this.pointNumber = Frame.Instance.lastNonUsedJoint;
 
       initEvents();
       initHandlers();
@@ -212,7 +212,7 @@
     {
       var p:Point;
       var angle:Number;
-      fixedJointContainer = new FixedJointContainer(frame, this.angleOfFixedJoint);
+      fixedJointContainer = new FixedJointContainer(Frame.Instance, this.angleOfFixedJoint);
       fixedJointContainer.x = this.fixedJointPosition.x;
       fixedJointContainer.y = this.fixedJointPosition.y;
       fixedJointContainer.segment = highlightedSegment;

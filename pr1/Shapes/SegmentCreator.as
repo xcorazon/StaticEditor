@@ -26,9 +26,9 @@
     private var circle:Shape;
     private var circlePresent:Boolean = false;
 
-    public function SegmentCreator(frame:Frame)
+    public function SegmentCreator()
     {
-      super(frame);
+      super();
       circle = new Shape();
       circle.graphics.lineStyle(0.5, 0xff);
       circle.graphics.drawCircle(0,0,3);

@@ -32,9 +32,9 @@
     protected var dimAngle:Number;
 
 
-    public function LinearDimensionCreatorX(frame:Frame)
+    public function LinearDimensionCreatorX()
     {
-      super(frame);
+      super();
     }
     
     override public function create()
@@ -44,6 +44,9 @@
       dimAngle = 0;
       
       super.create();
+      initEvents();
+      initHandlers();
+
     }
 
     private function initHandlers()
@@ -234,7 +237,7 @@
 
     override protected function createObject(data:Object)
     {
-      razmer = new LinearDimensionXContainer(frame, button_up, button_over, button_down, button_hit, data.name);
+      razmer = new LinearDimensionXContainer(Frame.Instance, button_up, button_over, button_down, button_hit, data.name);
       setValues(razmer, data);
 
       super.createObject(data);

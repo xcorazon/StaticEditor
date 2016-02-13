@@ -43,10 +43,9 @@
     private var moment:Moment = null;
 
 
-    public function MomentCreator(frame:Frame)
+    public function MomentCreator()
     {
-    
-      super(frame);
+      super();
       momentNumber = 2000 - 1;
     }
     
@@ -202,7 +201,7 @@
     {
       var p:Point;
       var angle:Number;
-      moment = new Moment(frame, button_up, button_over, button_down, button_hit, data.forceName);
+      moment = new Moment(Frame.Instance, button_up, button_over, button_down, button_hit, data.forceName);
 
       moment.units = data.units;
       moment.momentValue = data.forceValue;
