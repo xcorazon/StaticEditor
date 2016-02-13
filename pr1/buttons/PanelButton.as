@@ -20,6 +20,8 @@
     private var parent1;
     private var _message:PanelEvent;
 
+    private var _decor:BtnDecor;
+
     public function PanelButton(upState:DisplayObject = null,
                   overState:DisplayObject = null,
                   downState:DisplayObject = null,
@@ -33,8 +35,11 @@
       overStateCpy = this.overState;
       hitTestStateCpy = this.hitTestState;
 
+      _decor = new BtnDecor();
+
       this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
       this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+      changeState(INACTIVE);
     }
 
     public function set parentPanel(p){
@@ -45,26 +50,41 @@
       _message = msg;
     }
 
+    public function set decorator(decor:BtnDecor)
+    {
+      if (decor != null)
+        _decor = decor;
+    }
+
     public function changeState(st:int){
 
       switch(st){
         case DOWN:
-          upState = downStateCpy;
-          overState = downStateCpy;
-          hitTestState = null;
-          enabled = false;
+          if(_decor.isAllowDown())
+          {
+            upState = downStateCpy;
+            overState = downStateCpy;
+            hitTestState = null;
+            enabled = false;
+          }
           break;
         case UP:
-          upState = upStateCpy;
-          overState = overStateCpy;
-          hitTestState = hitTestStateCpy;
-          enabled  = true;
+          if(_decor.isAllowUp())
+          {
+            upState = upStateCpy;
+            overState = overStateCpy;
+            hitTestState = hitTestStateCpy;
+            enabled  = true;
+          }
           break;
         case INACTIVE:
-          upState = upStateCpy;
-          overState = overStateCpy;
-          hitTestState = null;
-          enabled = false;
+          if(_decor.isAllowInactive())
+          {
+            upState = upStateCpy;
+            overState = overStateCpy;
+            hitTestState = null;
+            enabled = false;
+          }
           break;
       }
     }
