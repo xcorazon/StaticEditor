@@ -4,6 +4,7 @@
   import flash.events.*;
   import flash.display.MovieClip;
   import pr1.buttons.PanelButton;
+  import pr1.events.PanelEvent;
 
   public class MovableJointPanel1 extends MovieClip
   {
@@ -27,7 +28,7 @@
       // создаем кнопки
       forwardAngle = new BtnForwardFreeDirection();
       forwardAngle.parentPanel = this;
-      forwardAngle.msgButton = FORWARD_ANGLE_DOWN;
+      forwardAngle.message = new PanelEvent(FORWARD_ANGLE_DOWN);
       forwardAngle.x = 15;
       forwardAngle.y = 13.375;
       forwardAngle.changeState(PanelButton.DOWN);
@@ -35,7 +36,7 @@
 
       reverseAngle = new BtnReverseFreeDirection();
       reverseAngle.parentPanel = this;
-      reverseAngle.msgButton = REVERSE_ANGLE_DOWN;
+      reverseAngle.message = new PanelEvent(REVERSE_ANGLE_DOWN);
       reverseAngle.x = 70;
       reverseAngle.y = 13.375;
       reverseAngle.changeState(PanelButton.UP);

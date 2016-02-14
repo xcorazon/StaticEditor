@@ -48,6 +48,7 @@
     
     override public function create()
     {
+      super.create();
       this.pointNumber = Frame.Instance.lastNonUsedJoint;
       this.thirdPointOfAngle = 4;
       this.angleValue = "90";
@@ -134,7 +135,7 @@
     private function rotateJoint(e:MouseEvent)
     {
       var cursorPosition:Point = new Point(e.stageX, e.stageY);
-      var angle = getAngle(cursorPosition);// !!!в этой функции будет изменена одна из координат cursorPosition
+      var angle = getAngle(cursorPosition);
       var angleOfSide:Number;
       var angleOfSegment:Number;
       var arrowTip:Point = jointPos.clone();
@@ -142,7 +143,7 @@
       arrowTip = jointPos.subtract(vec);
 
       secondPointOfAngle = this.pointNumber;
-
+      trace("joint angle = " + angle);
       if( angle == 0 || angle == 90 || angle == -90 || angle == 180 || angle == -180)
       {
         angleOfSide = 0; //angle * Math.PI/180;
@@ -275,7 +276,7 @@
     
     override protected function createObject(data:Object)
     {
-      joint = new MovableJointContainer(parent1, this.upState, this.overState, this.downState, hitTestState, elementImage);
+      joint = new MovableJointContainer(Frame.Instance, this.upState, this.overState, this.downState, hitTestState, elementImage);
       joint.reaction = data.reaction;
       joint.angleSign = this.angleSign;
       if(this.isAnglePresent)
@@ -307,7 +308,7 @@
     }
 
 
-    private function getAngle(cursorPosition:Point):Number
+    private function getAngle(cursor:Point):Number
     {
       var verticalSnap:uint = 2;
       var horisontalSnap:uint = 3;
@@ -317,6 +318,8 @@
       var localAngle = CoordinateTransformation.decartToPolar(p).y;
       var snap:uint = 0;
 
+      var cursorPosition = cursor.clone();
+      
       var localPoint:Point = CoordinateTransformation.screenToLocal(cursorPosition, jointPos, localAngle);
       // получаем наименьшую привязку
       if (Math.abs(localPoint.x) <= 10 )
@@ -333,9 +336,9 @@
         localPoint.y = 0;
         isAnglePresent = false;
         if(localPoint.x <= 0)
-          return 180;
+          return -(-90 + localAngle * 180/Math.PI);
         else
-          return 0;
+          return -(90 + localAngle * 180/Math.PI);
       }
       
       if(Math.abs(cursorPosition.x - jointPos.x) <= 10)

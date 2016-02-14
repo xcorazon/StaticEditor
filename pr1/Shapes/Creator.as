@@ -100,7 +100,6 @@
 
     private function creationCancel()
     {
-      preEndDialog();
       dispatchEvent(new Event(Creator.CREATE_CANCEL));
     }
     
