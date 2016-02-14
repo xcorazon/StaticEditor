@@ -37,6 +37,7 @@
       arrowAntiClockWise.message = new PanelEvent(ANTI_CLOCKWISE_DOWN);
       arrowAntiClockWise.x = 70;
       arrowAntiClockWise.y = 13.375;
+      arrowAntiClockWise.changeState(PanelButton.UP);
       addChild(arrowAntiClockWise);
 
       this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);

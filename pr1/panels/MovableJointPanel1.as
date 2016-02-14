@@ -38,6 +38,7 @@
       reverseAngle.msgButton = REVERSE_ANGLE_DOWN;
       reverseAngle.x = 70;
       reverseAngle.y = 13.375;
+      reverseAngle.changeState(PanelButton.UP);
       addChild(reverseAngle);
 
       this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);

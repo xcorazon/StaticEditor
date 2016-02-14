@@ -6,7 +6,7 @@
   import flash.geom.*;
   import flash.events.Event;
   import flash.events.MouseEvent;
-  import pr1.buttons.PanelButton;
+  import pr1.buttons.*;
   import pr1.events.PanelEvent;
   import pr1.Frame;
   import pr1.Shapes.*;
@@ -60,13 +60,13 @@
 
     private var subPanel:Shape;
     private var subPanelPresent:Boolean;
-    private var removedButtons:Array;
+    private var removableButtons:Array;
     private var oneRemovedButton:DisplayObject;
     private var panelLocked = false;
 
     private var parent1:*;
 
-    public function MainPanel(parent:Frame)
+    public function MainPanel()
     {
       createBtns = new Array();
       // constructor code
@@ -76,79 +76,92 @@
       shape.graphics.drawRect(0,0,70,600);
       this.addChild(shape);
 
-      this.parent1 = parent;
+      this.parent1 = Frame.Instance;
       subPanel = new Shape();
       addChild(subPanel);
-      removedButtons = new Array();
+      removableButtons = new Array();
 
       segment = new BtnOtrezok();
       segment.parentPanel = this;
-      segment.message = new PanelEvent(CREATE_OBJECT, false, false, new SegmentCreator(parent));
+      segment.message = new PanelEvent(CREATE_OBJECT, false, false, new SegmentCreator());
       createBtns.push(segment);
 
       concentratedForce = new BtnForce();
       concentratedForce.parentPanel = this;
-      concentratedForce.message = new PanelEvent(CREATE_OBJECT, false, false, new ConcentratedForceCreator(parent));
+      concentratedForce.message = new PanelEvent(CREATE_OBJECT, false, false, new ConcentratedForceCreator());
+      concentratedForce.decorator = new CommonDecor();
       createBtns.push(concentratedForce);
 
       distributedRForce = new BtnQl();
       distributedRForce.parentPanel = this;
-      distributedRForce.message = new PanelEvent(CREATE_OBJECT, false, false, new DistributedForceRCreator(parent));
+      distributedRForce.message = new PanelEvent(CREATE_OBJECT, false, false, new DistributedForceRCreator());
+      distributedRForce.decorator = new CommonDecor();
       createBtns.push(distributedRForce);
 
       distributedTForce = new BtnQmaxl();
       distributedTForce.parentPanel = this;
-      distributedTForce.message = new PanelEvent(CREATE_OBJECT, false, false, new DistributedForceTCreator(parent));
+      distributedTForce.message = new PanelEvent(CREATE_OBJECT, false, false, new DistributedForceTCreator());
+      distributedTForce.decorator = new CommonDecor();
       createBtns.push(distributedTForce);
 
       moment = new BtnMoment();
       moment.parentPanel = this;
-      moment.message = new PanelEvent(CREATE_OBJECT, false, false, new MomentCreator(parent));
+      moment.message = new PanelEvent(CREATE_OBJECT, false, false, new MomentCreator());
+      moment.decorator = new CommonDecor();
       createBtns.push(moment);
 
       freeDimension = new BtnRazmer();
       freeDimension.parentPanel = this;
-      freeDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreator(parent));
+      freeDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreator());
+      freeDimension.decorator = new CommonDecor();
       createBtns.push(freeDimension);
 
       xDimension = new BtnRazmerX();
       xDimension.parentPanel = this;
-      xDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreatorX(parent));
+      xDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreatorX());
+      xDimension.decorator = new CommonDecor();
       createBtns.push(xDimension);
 
       yDimension = new BtnRazmerY();
       yDimension.parentPanel = this;
-      yDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreatorY(parent));
+      yDimension.message = new PanelEvent(CREATE_OBJECT, false, false, new LinearDimensionCreatorY());
+      yDimension.decorator = new CommonDecor();
       createBtns.push(yDimension);
 
       freeAngle = new BtnAngle();
       freeAngle.parentPanel = this;
-      freeAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreator(parent));
+      freeAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreator());
+      freeAngle.decorator = new AngleDecor();
       createBtns.push(freeAngle);
 
       xAngle = new BtnAngleX();
       xAngle.parentPanel = this;
-      xAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreatorX(parent));
+      xAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreatorX());
+      xAngle.decorator = new AngleXYDecor();
       createBtns.push(xAngle);
 
       yAngle = new BtnAngleY();
       yAngle.parentPanel = this;
-      yAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreatorY(parent));
+      yAngle.message = new PanelEvent(CREATE_OBJECT, false, false, new AngleDimensionCreatorY());
+      yAngle.decorator = new AngleXYDecor();
       createBtns.push(yAngle);
 
       movableJoint = new BtnOpora1();
       movableJoint.parentPanel = this;
-      movableJoint.message = new PanelEvent(CREATE_OBJECT, false, false, new MovableJointCreator(parent));
+      movableJoint.message = new PanelEvent(CREATE_OBJECT, false, false, new MovableJointCreator());
+      movableJoint.decorator = new MovableJointDecor();
       createBtns.push(movableJoint);
 
       sealing = new BtnOpora3();
       sealing.parentPanel = this;
-      sealing.message = new PanelEvent(CREATE_OBJECT, false, false, new SealingCreator(parent));
+      sealing.message = new PanelEvent(CREATE_OBJECT, false, false, new SealingCreator());
+      sealing.decorator = new SealingDecor();
       createBtns.push(sealing);
 
       fixedJoint = new BtnOpora2();
       fixedJoint.parentPanel = this;
-      fixedJoint.message = new PanelEvent(CREATE_OBJECT, false, false, new FixedJointCreator(parent));
+      fixedJoint.message = new PanelEvent(CREATE_OBJECT, false, false, new FixedJointCreator());
+      fixedJoint.decorator = new FixedJointDecor();
       createBtns.push(fixedJoint);
 
       this.addChild(segment);
@@ -159,6 +172,9 @@
       solve.x = 35;
       solve.y = 27+48*7;
       this.addChild(solve);
+      solve.parentPanel = this;
+      solve.message = new PanelEvent(MainPanel.SEND_DATA_TO_SERVER);
+      createBtns.push(solve);
 
       var tempShape = new BtnQl().upState;
       this.addChild(tempShape);
@@ -185,7 +201,6 @@
       
       addEventListener(MouseEvent.MOUSE_MOVE, onMouseOver);
       addEventListener(MainPanel.CREATE_OBJECT, onCreate);
-      solve.addEventListener(MouseEvent.CLICK, onDoSolve);
     }
 
     private function setButtonsCoordinates()
@@ -246,100 +261,15 @@
         removeChild(oneRemovedButton);
         oneRemovedButton = null;
       }
-
-      if(parent1.segments.length <=1)
-      {
-        freeAngle.changeState(PanelButton.INACTIVE);
-      }
-      else
-      {
-        freeAngle.changeState(PanelButton.UP);
-      }
-
-      var notOrtoSeg:Boolean = false;
-      for each (var seg:Segment in parent1.segments)
-      {
-        if(seg.specialDirection != Segment.HORISONTAL && seg.specialDirection != Segment.VERTICAL)
-        {
-          notOrtoSeg = true;
-          break;
-        }
-      }
-      if(notOrtoSeg)
-      {
-        xAngle.changeState(PanelButton.UP);
-        yAngle.changeState(PanelButton.UP);
-      }
-      else
-      {
-        xAngle.changeState(PanelButton.INACTIVE);
-        yAngle.changeState(PanelButton.INACTIVE);
-      }
-
-      if(parent1.segments.length == 0)
-      {
-        var state1 = PanelButton.INACTIVE
-        sealing.changeState(PanelButton.INACTIVE);
-        fixedJoint.changeState(PanelButton.INACTIVE);
-        movableJoint.changeState(PanelButton.INACTIVE);
-      }
-      else
-      {
-        state1 = PanelButton.UP;
-        if( Frame(parent1).opora1.length >= 3 || Frame(parent1).opora3 != null || (Frame(parent1).opora2 != null && Frame(parent1).opora1.length >= 1))
-        {
-          sealing.changeState(PanelButton.INACTIVE);
-          fixedJoint.changeState(PanelButton.INACTIVE);
-          movableJoint.changeState(PanelButton.INACTIVE);
-        }
-        else if(Frame(parent1).opora1.length >= 2 || Frame(parent1).opora2 != null)
-        {
-          sealing.changeState(PanelButton.INACTIVE);
-          fixedJoint.changeState(PanelButton.INACTIVE);
-          movableJoint.changeState(PanelButton.UP);
-        }
-        else if(Frame(parent1).opora1.length >= 1)
-        {
-          sealing.changeState(PanelButton.INACTIVE);
-          fixedJoint.changeState(PanelButton.UP);
-          movableJoint.changeState(PanelButton.UP);
-        }
-        else
-        {
-          sealing.changeState(PanelButton.UP);
-          fixedJoint.changeState(PanelButton.UP);
-          movableJoint.changeState(PanelButton.UP);
-        }
-      }
-      concentratedForce.changeState(state1);
-      distributedRForce.changeState(state1);
-      distributedTForce.changeState(state1);
-      moment.changeState(state1);
-      freeDimension.changeState(state1);
-      xDimension.changeState(state1);
-      yDimension.changeState(state1);
-
-      segment.changeState(PanelButton.UP);
+      
+      for each (var btn in this.createBtns)
+        btn.changeState(PanelButton.UP);
     }
 
     public function setButtonsInactiveState()
     {
-      var state1 = PanelButton.INACTIVE;
-
-      concentratedForce.changeState(state1);
-      distributedRForce.changeState(state1);
-      distributedTForce.changeState(state1);
-      moment.changeState(state1);
-      freeDimension.changeState(state1);
-      xDimension.changeState(state1);
-      yDimension.changeState(state1);
-      freeAngle.changeState(state1);
-      xAngle.changeState(state1);
-      yAngle.changeState(state1);
-      segment.changeState(state1);
-      sealing.changeState(PanelButton.INACTIVE);
-      fixedJoint.changeState(PanelButton.INACTIVE);
-      movableJoint.changeState(PanelButton.INACTIVE);
+      for each (var btn in this.createBtns)
+        btn.changeState(PanelButton.INACTIVE);
     }
 
     private function onMouseOver(e:MouseEvent)
@@ -356,7 +286,7 @@
           }
           else
           {
-            for each (var btn in removedButtons)
+            for each (var btn in removableButtons)
             {
               removeChild(btn);
             }
@@ -377,7 +307,7 @@
         subPanelPresent = true;
         addChild(distributedRForce);
         addChild(distributedTForce);
-        removedButtons = new Array(distributedRForce, distributedTForce);
+        removableButtons = new Array(distributedRForce, distributedTForce);
       } else if(cursorPosition.y >= 195 && cursorPosition.y <= 243 && cursorPosition.x <= 205)
       {
         if(subPanelPresent)
@@ -388,7 +318,7 @@
           }
           else
           {
-            for each (btn in removedButtons)
+            for each (btn in removableButtons)
             {
               removeChild(btn);
             }
@@ -410,7 +340,7 @@
         addChild(freeDimension);
         addChild(xDimension);
         addChild(yDimension);
-        removedButtons = new Array(freeDimension, xDimension, yDimension);
+        removableButtons = new Array(freeDimension, xDimension, yDimension);
       }
       else if(cursorPosition.y >= 243 && cursorPosition.y <= 291 && cursorPosition.x <= 205)
       {
@@ -422,7 +352,7 @@
           }
           else
           {
-            for each (btn in removedButtons)
+            for each (btn in removableButtons)
             {
               removeChild(btn);
             }
@@ -444,7 +374,7 @@
         addChild(freeAngle);
         addChild(xAngle);
         addChild(yAngle);
-        removedButtons = new Array(freeAngle, xAngle, yAngle);
+        removableButtons = new Array(freeAngle, xAngle, yAngle);
       }
       else if(cursorPosition.y >= 291 && cursorPosition.y <= 339 && cursorPosition.x <= 205)
       {
@@ -456,7 +386,7 @@
           }
           else
           {
-            for each (btn in removedButtons)
+            for each (btn in removableButtons)
             {
               removeChild(btn);
             }
@@ -478,35 +408,38 @@
         addChild(movableJoint);
         addChild(fixedJoint);
         addChild(sealing);
-        removedButtons = new Array(sealing, fixedJoint, movableJoint);
+        removableButtons = new Array(sealing, fixedJoint, movableJoint);
       }
       else
       {
-        for each (btn in removedButtons)
+        for each (btn in removableButtons)
         {
           removeChild(btn);
         }
         subPanel.graphics.clear();
         subPanelPresent = false;
-        removedButtons = new Array();
+        removableButtons = new Array();
       }
     }
 
     private function removeSubPanel()
     {
-      for each (var btn in this.removedButtons)
+      for each (var btn in this.removableButtons)
       {
         removeChild(btn);
       }
-      this.removedButtons = new Array();
+      this.removableButtons = new Array();
       subPanel.graphics.clear();
       subPanelPresent = false;
     }
 
-	private function onCreate(e:PanelEvent)
-	{
-		
-	}
+    private function onCreate(e:PanelEvent)
+    {
+      setButtonsInactiveState();
+      e.button.changeState(PanelButton.DOWN);
+      panelLocked = true;
+    }
+    /*
     private function onCreateSegment(e:Event)
     {
       setButtonsInactiveState();
@@ -635,9 +568,6 @@
       panelLocked = true;
       removeSubPanel();
     }
-    private function onDoSolve(e:MouseEvent)
-    {
-      dispatchEvent(new Event(MainPanel.SEND_DATA_TO_SERVER, true));
-    }
+    */
   }
 }

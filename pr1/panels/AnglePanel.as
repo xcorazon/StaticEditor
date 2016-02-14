@@ -38,6 +38,7 @@
       outerAngle.message = new PanelEvent(OUTER_ANGLE_DOWN);
       outerAngle.x = 70;
       outerAngle.y = 13.375;
+      outerAngle.changeState(PanelButton.UP);
       addChild(outerAngle);
 
       this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);

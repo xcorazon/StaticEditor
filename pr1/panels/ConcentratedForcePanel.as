@@ -59,6 +59,7 @@
       arrowTo.message = new PanelEvent(ARROW_TO_DOWN);
       arrowTo.x = 5;
       arrowTo.y = 70;
+      arrowTo.changeState(PanelButton.UP);
       addChild(arrowTo);
 
       forwardDirectionX = new BtnForwardDirectionX();
