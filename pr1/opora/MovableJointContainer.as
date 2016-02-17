@@ -17,7 +17,6 @@
   import flash.display.Shape;
   import pr1.Shapes.Arrow;
   import pr1.Shapes.Segment;
-  import pr1.EditEvent;
   import pr1.forces.Element;
   import pr1.events.DialogEvent;
 

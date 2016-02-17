@@ -28,7 +28,6 @@
   import com.adobe.images.PNGEncoder;
   import flash.system.Security;
   import pr1.panels.MainPanel;
-  import pr1.EditEvent;
   import pr1.Shapes.Segment;
   import flash.net.*;
   import flash.utils.ByteArray;

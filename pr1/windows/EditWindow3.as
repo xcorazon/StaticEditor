@@ -1,7 +1,6 @@
 ﻿package pr1.windows
 {
   import flash.display.MovieClip;
-  import pr1.EditEvent;
   import pr1.panels.ComBox;
   import flash.events.*;
   import flash.text.*;

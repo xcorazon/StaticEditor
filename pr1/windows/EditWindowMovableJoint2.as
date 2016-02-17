@@ -2,10 +2,8 @@
 
 package pr1.windows
 {
-
   import flash.display.*;
   import pr1.windows.EditWindow;
-  import pr1.EditEvent1;
   import flash.events.*;
   import flash.text.*;
 
