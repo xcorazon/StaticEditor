@@ -239,20 +239,14 @@
       force.angleSign = elementImage.angleSign;
       force.anglePoints = this.anglePoints;
 
-      angle = panel.angleOfAxis;
-      angle += arrowAngle;
-      p = Point.polar(70, angle);
-      p.y = -p.y;  // преобразуем из дкартовой системы координат в оконную
-      force.setCoordOfForceName(p);
-      angle = angle - arrowAngle/2;
-      p = Point.polar(30, angle);
-      p.y = -p.y; // преобразуем из дкартовой системы координат в оконную
-      force.setCoordOfAngleName(p);
+      force.angleOfAxis = panel.angleOfAxis;
+      force.arrowAngle = Math.abs(arrowAngle);
+
       force.x = arrowCoordinates.x;
       force.y = arrowCoordinates.y;
+      force.setCoordOfSignatures();
 
       super.createObject(data);
-      //dispatchEvent(new Event(ConcentratedForceCreator.CREATE_DONE));
     }
 
     override public function get result():*

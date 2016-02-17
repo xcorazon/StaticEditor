@@ -14,12 +14,15 @@
   import flash.text.Font;
   import pr1.Frame;
   import pr1.events.DialogEvent;
+  import pr1.CoordinateTransformation;
 
 
   public class ConcentratedForce extends Element
   {
 
     public var anglePoints:Array;
+    public var angleOfAxis:Number;
+    public var arrowAngle:Number;
 
     public function ConcentratedForce(frame:Frame, upState:DisplayObject = null,
                       overState:DisplayObject = null,
@@ -56,6 +59,25 @@
       angleName  = data.angleName;
       angleValue = data.angleValue;
       units      = data.units;
+    }
+    
+    public function setCoordOfSignatures()
+    {
+      var R:Number = 80;
+      var angle:Number = angleOfAxis + angleSign * arrowAngle;
+      var p:Point = Point.polar(R, angle);
+      p.y *= -1;
+      p.x = p.x - signatures.force.width/2;
+      p.y = p.y - signatures.force.height/2;
+      setCoordOfForceName(p);
+
+      angle = angleOfAxis + angleSign * arrowAngle/2;
+      R = 40;
+      p = Point.polar(R, angle);
+      p.y *= -1;
+      p.x = p.x - signatures.angle.width/2;
+      p.y = p.y - signatures.angle.height/2;
+      setCoordOfAngleName(p);
     }
 
 

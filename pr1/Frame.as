@@ -2,33 +2,18 @@
 {
   import flash.display.*;
   import flash.events.*;
-  import flash.text.*; //TextField;
+  import flash.text.*;
   import flash.ui.Keyboard;
   import flash.geom.Point;
   import pr1.forces.*;
   import pr1.razmers.*;
-  import pr1.Shapes.MomentCreator;
-  import pr1.Shapes.Creator;
-  import pr1.Shapes.SegmentCreator;
-  import pr1.Shapes.ConcentratedForceCreator;
-  import pr1.Shapes.DistributedForceRCreator;
-  import pr1.Shapes.DistributedForceTCreator;
-  import pr1.Shapes.LinearDimensionCreator;
-  import pr1.Shapes.LinearDimensionCreatorX;
-  import pr1.Shapes.LinearDimensionCreatorY;
-  import pr1.Shapes.AngleDimensionCreator;
-  import pr1.Shapes.AngleDimensionCreatorX;
-  import pr1.Shapes.AngleDimensionCreatorY;
-  import pr1.Shapes.SealingCreator;
-  import pr1.Shapes.FixedJointCreator;
-  import pr1.Shapes.MovableJointCreator;
+  import pr1.Shapes.*
   import pr1.Snap;
   import pr1.opora.*;
   import pr1.tests.Workspace;
   import com.adobe.images.PNGEncoder;
   import flash.system.Security;
   import pr1.panels.MainPanel;
-  import pr1.Shapes.Segment;
   import flash.net.*;
   import flash.utils.ByteArray;
   import flash.utils.Timer;
@@ -545,51 +530,35 @@
       createOutData();
       // получаем имя для сохранения файла
       var loader:URLLoader = new URLLoader();
-      var req:URLRequest = new URLRequest("http://teormeh.com/index.php?option=com_statr&task=get_name");
-
-      // для тестирования
-      //var req:URLRequest = new URLRequest("http://teormeh/index.php?option=com_statr&task=get_name");
+      var req:URLRequest = new URLRequest(ComConst.URL_GET_NAME);
 
       req.method = URLRequestMethod.POST;
       loader.dataFormat = URLLoaderDataFormat.TEXT;
       loader.load(req);
       loader.addEventListener(Event.COMPLETE, completeHandler);
     }
-    private function completeHandler(event:Event):void {
 
-          var loader:URLLoader = URLLoader(event.target);
-          _resolveFileName = loader.data;
-
-
+    private function completeHandler(event:Event):void
+    {
+      var loader:URLLoader = URLLoader(event.target);
       var bmp:Bitmap = new Bitmap(parent1.getBitmap());
       var brr:ByteArray = PNGEncoder.encode(bmp.bitmapData);
+      _resolveFileName = loader.data;
 
-
-      var req:URLRequest = new URLRequest("http://teormeh.com/index.php?option=com_statr&task=save_png&name=" + _resolveFileName);
-
-      // для тестирования
-      //var req:URLRequest = new URLRequest("http://teormeh/index.php?option=com_statr&task=save_png&name=" + _resolveFileName);
-
+      var req:URLRequest = new URLRequest(ComConst.URL_SEND_BITMAP + _resolveFileName);
       req.method = URLRequestMethod.POST;
       req.data = brr;
       req.contentType = "application/octet-stream";
-
       loader = new URLLoader();
       loader.load(req);
-      req = null;
-
-      req = new URLRequest("http://teormeh.com/index.php?option=com_statr&task=save_xml&name=" + _resolveFileName);
-
-      // для тестирования
-      //req = new URLRequest("http://teormeh/index.php?option=com_statr&task=save_xml&name=" + _resolveFileName);
 
       var rhArray:Array = new Array(new URLRequestHeader("Content-Transfer-Encoding", "binary"));
-
+      req = null;
+      req = new URLRequest(ComConst.URL_SEND_XML + _resolveFileName);
       req.method = URLRequestMethod.POST;
       req.data = this.outData.data;
       req.contentType = "application/octet-stream";
       req.requestHeaders = rhArray;
-
       loader = new URLLoader();
       loader.load(req);
 
