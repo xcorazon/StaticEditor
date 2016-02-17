@@ -185,6 +185,7 @@
       
       addEventListener(MouseEvent.MOUSE_MOVE, onMouseOver);
       addEventListener(MainPanel.CREATE_OBJECT, onCreate);
+      addEventListener(MainPanel.SEND_DATA_TO_SERVER, onSendData);
     }
 
     private function setButtonsCoordinates()
@@ -396,7 +397,7 @@
       
       var cls:Class = getDefinitionByName(getQualifiedClassName(e.button)) as Class;
       var btn:Object = new cls();
-	  btn.destroy();
+      btn.destroy();
       
       if (subPanelPresent)
       {
@@ -407,6 +408,12 @@
         removeSubPanel();
       }
       panelLocked = true;
+    }
+    
+    private function onSendData(e:PanelEvent)
+    {
+      setButtonsInactiveState();
+      e.button.changeState(PanelButton.DOWN);
     }
   }
 }

@@ -281,7 +281,10 @@
       joint.angleSign = this.angleSign;
       if(this.isAnglePresent)
       {
-        joint.angle = data.angle;
+        if (data.angle == "")
+          joint.angle = data.angleValue;
+        else
+          joint.angle = data.angle;
         angleValue = data.angleValue;
       }
       joint.angleValue = angleValue;
