@@ -14,10 +14,10 @@ package pr1.windows
 
     public function EditWindowMovableJoint1(reaction_name:String, angle:String, angle_value:String)
     {
-      _children = new Object();
       var txtFormat:TextFormat = new TextFormat("Arial", 12, 0x0, true);
       var txtFormat1:TextFormat = new TextFormat("Symbol1", 14, 0x0, true);
-      addBackground();
+      removeChild(_children.forceName);
+      removeChild(_children.forceValue);
       var reaction = new TextField();
       with(reaction)
       {
@@ -77,25 +77,11 @@ package pr1.windows
       if(angleValue != "")
         angleValue.text = angle_value;
 
-      okButton = new OkButton();
       okButton.x = 30;
       okButton.y = 50;
-      okButton.width = 40;
-      okButton.height = 29;
-      addChild(okButton);
 
-      cancelButton = new CancelButton();
       cancelButton.x = 100;
       cancelButton.y = 50;
-      cancelButton.width = 62;
-      cancelButton.height = 29;
-      addChild(cancelButton);
-
-      errWindow = new ErrorDialog();
-      errWindow.x = -65;
-      errWindow.y = -35;
-
-      initEvents();
     }
 
     override protected function addBackground():void

@@ -279,12 +279,10 @@
       joint = new MovableJointContainer(Frame.Instance, this.upState, this.overState, this.downState, hitTestState, elementImage);
       joint.reaction = data.reaction;
       joint.angleSign = this.angleSign;
+      joint.angle = "";
       if(this.isAnglePresent)
       {
-        if (data.angle == "")
-          joint.angle = data.angleValue;
-        else
-          joint.angle = data.angle;
+        joint.angle = data.angle;
         angleValue = data.angleValue;
       }
       joint.angleValue = angleValue;
