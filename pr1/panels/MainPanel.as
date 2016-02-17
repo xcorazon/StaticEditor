@@ -6,27 +6,11 @@
   import flash.geom.*;
   import flash.events.Event;
   import flash.events.MouseEvent;
+  import flash.utils.*;
   import pr1.buttons.*;
   import pr1.events.PanelEvent;
   import pr1.Frame;
   import pr1.Shapes.*;
-  import pr1.Shapes.Segment;
-  
-  import pr1.Shapes.MomentCreator;
-  import pr1.Shapes.Creator;
-  import pr1.Shapes.SegmentCreator;
-  import pr1.Shapes.ConcentratedForceCreator;
-  import pr1.Shapes.DistributedForceRCreator;
-  import pr1.Shapes.DistributedForceTCreator;
-  import pr1.Shapes.LinearDimensionCreator;
-  import pr1.Shapes.LinearDimensionCreatorX;
-  import pr1.Shapes.LinearDimensionCreatorY;
-  import pr1.Shapes.AngleDimensionCreator;
-  import pr1.Shapes.AngleDimensionCreatorX;
-  import pr1.Shapes.AngleDimensionCreatorY;
-  import pr1.Shapes.SealingCreator;
-  import pr1.Shapes.FixedJointCreator;
-  import pr1.Shapes.MovableJointCreator;
 
   public class MainPanel extends Sprite
   {
@@ -292,22 +276,8 @@
             }
           }
         }
-        subPanel.graphics.clear();
-        subPanel.graphics.lineStyle();
-        subPanel.graphics.beginFill(0xcccccc);
-        subPanel.graphics.drawRect(1,0,140,54);
-        subPanel.graphics.endFill();
-        subPanel.graphics.lineStyle(1, 0x666666);
-        subPanel.graphics.moveTo(70, 0);
-        subPanel.graphics.lineTo(140, 0);
-        subPanel.graphics.lineTo(140, 54);
-        subPanel.graphics.lineTo(70, 54);
-        subPanel.x = 0;
-        subPanel.y = 144;
-        subPanelPresent = true;
-        addChild(distributedRForce);
-        addChild(distributedTForce);
         removableButtons = new Array(distributedRForce, distributedTForce);
+        addSubPanel(3, removableButtons);
       } else if(cursorPosition.y >= 195 && cursorPosition.y <= 243 && cursorPosition.x <= 205)
       {
         if(subPanelPresent)
@@ -324,23 +294,8 @@
             }
           }
         }
-        subPanel.graphics.clear();
-        subPanel.graphics.lineStyle();
-        subPanel.graphics.beginFill(0xcccccc);
-        subPanel.graphics.drawRect(1,0,210,54);
-        subPanel.graphics.endFill();
-        subPanel.graphics.lineStyle(1, 0x666666);
-        subPanel.graphics.moveTo(70, 0);
-        subPanel.graphics.lineTo(210, 0);
-        subPanel.graphics.lineTo(210, 54);
-        subPanel.graphics.lineTo(70, 54);
-        subPanel.x = 0;
-        subPanel.y = 192;
-        subPanelPresent = true;
-        addChild(freeDimension);
-        addChild(xDimension);
-        addChild(yDimension);
         removableButtons = new Array(freeDimension, xDimension, yDimension);
+        addSubPanel(4, removableButtons);
       }
       else if(cursorPosition.y >= 243 && cursorPosition.y <= 291 && cursorPosition.x <= 205)
       {
@@ -358,23 +313,8 @@
             }
           }
         }
-        subPanel.graphics.clear();
-        subPanel.graphics.lineStyle();
-        subPanel.graphics.beginFill(0xcccccc);
-        subPanel.graphics.drawRect(1,0,210,54);
-        subPanel.graphics.endFill();
-        subPanel.graphics.lineStyle(1, 0x666666);
-        subPanel.graphics.moveTo(70, 0);
-        subPanel.graphics.lineTo(210, 0);
-        subPanel.graphics.lineTo(210, 54);
-        subPanel.graphics.lineTo(70, 54);
-        subPanel.x = 0;
-        subPanel.y = 240;
-        subPanelPresent = true;
-        addChild(freeAngle);
-        addChild(xAngle);
-        addChild(yAngle);
         removableButtons = new Array(freeAngle, xAngle, yAngle);
+        addSubPanel(5, removableButtons);
       }
       else if(cursorPosition.y >= 291 && cursorPosition.y <= 339 && cursorPosition.x <= 205)
       {
@@ -392,23 +332,8 @@
             }
           }
         }
-        subPanel.graphics.clear();
-        subPanel.graphics.lineStyle();
-        subPanel.graphics.beginFill(0xcccccc);
-        subPanel.graphics.drawRect(1,0,210,54);
-        subPanel.graphics.endFill();
-        subPanel.graphics.lineStyle(1, 0x666666);
-        subPanel.graphics.moveTo(70, 0);
-        subPanel.graphics.lineTo(210, 0);
-        subPanel.graphics.lineTo(210, 54);
-        subPanel.graphics.lineTo(70, 54);
-        subPanel.x = 0;
-        subPanel.y = 288;
-        subPanelPresent = true;
-        addChild(movableJoint);
-        addChild(fixedJoint);
-        addChild(sealing);
         removableButtons = new Array(sealing, fixedJoint, movableJoint);
+        addSubPanel(6, removableButtons);
       }
       else
       {
@@ -421,13 +346,44 @@
         removableButtons = new Array();
       }
     }
+    
+    private function addSubPanel(pos:int, buttons:Array)
+    {
+      subPanel.graphics.clear();
+      if (buttons.length <= 1)
+      {
+        subPanelPresent = false;
+        return;
+      }
+      
+      var buttonHeight:int = 42;
+      var buttonsGap:int = 6; // расстояние между кнопками
+      
+      var width:int = buttons.length * 70;
+      var height:int = 54;
+
+      subPanel.graphics.lineStyle();
+      subPanel.graphics.beginFill(0xcccccc);
+      subPanel.graphics.drawRect(1,0,width,height);
+      subPanel.graphics.endFill();
+      subPanel.graphics.lineStyle(1, 0x666666);
+      subPanel.graphics.moveTo(70, 0);
+      subPanel.graphics.lineTo(width, 0);
+      subPanel.graphics.lineTo(width, height);
+      subPanel.graphics.lineTo(70, height);
+      subPanel.x = 0;
+      subPanel.y = buttonsGap/2 + pos * (buttonHeight + buttonsGap);
+      subPanelPresent = true;
+      
+      for each(var btn in buttons)
+        addChild(btn);
+    }
 
     private function removeSubPanel()
     {
       for each (var btn in this.removableButtons)
-      {
         removeChild(btn);
-      }
+
       this.removableButtons = new Array();
       subPanel.graphics.clear();
       subPanelPresent = false;
@@ -437,137 +393,20 @@
     {
       setButtonsInactiveState();
       e.button.changeState(PanelButton.DOWN);
+      
+      var cls:Class = getDefinitionByName(getQualifiedClassName(e.button)) as Class;
+      var btn:Object = new cls();
+	  btn.destroy();
+      
+      if (subPanelPresent)
+      {
+        oneRemovedButton = btn.downState;
+        oneRemovedButton.x = 35;
+        oneRemovedButton.y = e.button.y;
+        addChild(oneRemovedButton);
+        removeSubPanel();
+      }
       panelLocked = true;
     }
-    /*
-    private function onCreateSegment(e:Event)
-    {
-      setButtonsInactiveState();
-      segment.changeState(PanelButton.DOWN);
-      panelLocked = true;
-    }
-    private function onCreateConcentratedForce(e:Event)
-    {
-      setButtonsInactiveState();
-      concentratedForce.changeState(PanelButton.DOWN);
-      panelLocked = true;
-    }
-    private function onCreateMoment(e:Event)
-    {
-      setButtonsInactiveState();
-      moment.changeState(PanelButton.DOWN);
-      panelLocked = true;
-    }
-    private function onCreateDistributedRForce(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnQl().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*3;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateDistributedTForce(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnQmaxl().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*3;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateFreeDimension(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnRazmer().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*4;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateDimensionX(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnRazmerX().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*4;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateDimensionY(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnRazmerY().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*4;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateFreeAngle(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnAngle().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*5;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateAngleX(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnAngleX().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*5;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateAngleY(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnAngleY().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*5;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateMovableJoint(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnOpora1().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*6;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateFixedJoint(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnOpora2().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*6;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    private function onCreateSealing(e:Event)
-    {
-      setButtonsInactiveState();
-      oneRemovedButton = new BtnOpora3().downState;
-      addChild(oneRemovedButton);
-      oneRemovedButton.x = 35;
-      oneRemovedButton.y = 27+48*6;
-      panelLocked = true;
-      removeSubPanel();
-    }
-    */
   }
 }
