@@ -16,6 +16,8 @@
   public class Moment extends Element
   {
 
+    public var arrowAngle:Number;
+    
     public function Moment(frame:Frame, upState:DisplayObject = null,
                  overState:DisplayObject = null,
                  downState:DisplayObject = null,
@@ -63,6 +65,18 @@
     public function get isClockWise():Boolean
     {
       return params.clockWise;
+    }
+    
+    public function setCoordOfSignatures()
+    {
+      var sign = isClockWise ? -1:1;
+      var delta:Number = sign * 15 * Math.PI/180;
+      var p:Point = Point.polar(40, arrowAngle + delta);
+      p.y *= -1;
+      
+      p.x = p.x - signatures.moment.width/2;
+      p.y = p.y - signatures.moment.height/2;
+      setCoordOfMomentName(p);
     }
     
     public function setCoordOfMomentName(p:Point)

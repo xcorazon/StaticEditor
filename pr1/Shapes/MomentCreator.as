@@ -22,10 +22,6 @@
 
   public class MomentCreator extends Creator
   {
-    // события в объекте
-    //public static const CREATE_CANCEL:String = "Cancel creation of moment";
-    //public static const CREATE_DONE:String = "Done creation of moment";
-
     private var momentNumber:int;
     private var highlightedSegment:Segment;
     private var panel:MomentPanel;
@@ -210,9 +206,9 @@
       moment.segment = highlightedSegment;
       moment.momentNumber = momentNumber;
       moment.isClockWise = this.isClockWise;
-      p = Point.polar(40, arrowAngle);
-      p.y = -p.y;  // преобразуем из дкартовой системы координат в оконную
-      moment.setCoordOfMomentName(p);
+      moment.arrowAngle = arrowAngle;
+      moment.setCoordOfSignatures();
+      
       moment.x = arrowCoordinates.x;
       moment.y = arrowCoordinates.y;
 

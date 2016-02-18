@@ -236,20 +236,19 @@
       distributedForce.forceNumber1 = this.forceNumber1;
       distributedForce.forceNumber2 = this.forceNumber2;
       distributedForce.angleValue = this.angleValue;
-
+      
       p = highlightedSegment.secondDecartCoord.subtract(highlightedSegment.firstDecartCoord);
       angle = CoordinateTransformation.decartToPolar(p).y;
       
-      // временно расчет координаты подписи нагрузки q
-      var coef = arrowsHeight >= 0 ? 1 : 0;
-      p = new Point(arrowsLength/2, arrowsHeight + coef * 23);
-      p = CoordinateTransformation.rotate(p, angle);
-
-      p.y = -p.y;  // преобразуем из дкартовой системы координат в оконную
-      distributedForce.setCoordOfForceName(p);
+      distributedForce.angleOfAxis = angle;
+      distributedForce.arrowsHeight = arrowsHeight;
+      distributedForce.arrowsLength = arrowsLength;
+      
+      distributedForce.setCoordOfSignatures();
+     
       distributedForce.x = arrowsCoordinate1.x;
       distributedForce.y = arrowsCoordinate1.y;
-
+      
       super.createObject(data);
     }
 

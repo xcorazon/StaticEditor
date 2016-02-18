@@ -15,12 +15,16 @@
   import pr1.Frame;
   import pr1.events.DialogEvent;
   import pr1.forces.Element;
+  import pr1.CoordinateTransformation;
 
 
   public class DistributedForceR extends Element
   {
     public var forceNumber1:int;
     public var forceNumber2:int;
+    public var arrowsHeight:int;
+    public var arrowsLength:int;
+    public var angleOfAxis:Number;
 
     public function DistributedForceR(frame:Frame, upState:DisplayObject = null,
                  overState:DisplayObject = null,
@@ -46,6 +50,18 @@
       dialogWnd.y = 300;
       parent1.addChild(dialogWnd);
       dialogWnd.addEventListener(DialogEvent.END_DIALOG, onEndDialog);
+    }
+    
+    public function setCoordOfSignatures()
+    {
+      var sign = arrowsHeight >= 0 ? 1 : -1;
+      var height = Math.max(Math.abs(arrowsHeight), 26) + 10;
+      var p:Point = new Point(arrowsLength/2, sign * height);
+      p = CoordinateTransformation.rotate(p, angleOfAxis);
+      p.y *= -1;
+      p.x = p.x - signatures.name.width/2;
+      p.y = p.y - signatures.name.height/2;
+      setCoordOfForceName(p);
     }
 
     override protected function changeValues(data:Object)
