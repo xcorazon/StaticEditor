@@ -166,14 +166,17 @@
       {
         opora1.push(obj);
         lastNonUsedJoint++;
+        snap1.joints = this.joints;
       }
       else if (obj is FixedJointContainer)
       {
         opora2 = obj;
         lastNonUsedJoint++;
+        snap1.joints = this.joints;
       }
       else if (obj is SealingContainer)
         opora3 = obj;
+        snap1.joints = this.joints;
     }
 
     private function get joints():Array {

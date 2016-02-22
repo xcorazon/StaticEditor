@@ -5,11 +5,11 @@
 	import pr1.Shapes.Segment;
 	
 	public class Snap {
-		private var segments:Array;
-		private var distributedForcesR:Array;	// прямоугольная распределенная нагрузка
-		private var distributedForcesT:Array;	// треугольная распределенная нагрузка
-		private var concentratedForces:Array;
-		private var joints:Array;
+		public var segments:Array;
+		public var distributedForcesR:Array;	// прямоугольная распределенная нагрузка
+		public var distributedForcesT:Array;	// треугольная распределенная нагрузка
+		public var concentratedForces:Array;
+		public var joints:Array;
 		
 		private var threshold1:Number;
 		
