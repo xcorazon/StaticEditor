@@ -149,24 +149,25 @@
         angleOfSide = 0; //angle * Math.PI/180;
         firstPointOfAngle = 0;
         this.angleOfAxis = 0;
-        if(jointPos.x == cursorPosition.x)
+        if(angle == 0)
         {
           angleValue = "90";
-          if(cursorPosition.y - jointPos.y >= 0)
-          {
-            angleSign = 1;
-          }
-          else
-            angleSign = -1;
+          angleSign = 1;
         }
-        if(jointPos.y == cursorPosition.y)
+        if(angle == -90)
         {
-          if(cursorPosition.x - jointPos.x >= 0)
-          {
-            angleValue = "180";
-          }
-          else
-            angleValue = "0";
+          angleValue = "180";
+          angleSign = 1;
+        }
+        if(angle == 180 || angle == -180)
+        {
+          angleValue = "90";
+          angleSign = -1;
+        }
+        if(angle == 90)
+        {
+          angleValue = "0";
+          angleSign = -1;
         }
       }
       else
@@ -201,12 +202,13 @@
       this.hitTestState = this.upState;
       parent1.removeChild(elementImage);
       elementImage = new Arrow(jointPos, angleOfSide, arrowTip, false, 0xCC0000);
+      
       if(angleValue == null)
       {
         angleSign = elementImage.angleSign;
         angleValue = (Math.abs(elementImage.angleOfTipOrTail)*180/Math.PI).toFixed(0);
       }
-
+      
       elementImage.x = jointPos.x;
       elementImage.y = jointPos.y;
       parent1.addChild(elementImage);
