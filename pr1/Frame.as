@@ -150,10 +150,10 @@
         pForces.push(obj);
       else if (obj is Moment)
         mForces.push(obj);
-      else if (obj is DistributedForceR)
-        qForcesR.push(obj);
       else if (obj is DistributedForceT)
         qForcesT.push(obj);
+      else if (obj is DistributedForceR)
+        qForcesR.push(obj);
       else if (obj is LinearDimensionContainer)
         freeDimensions.push(obj);
       else if (obj is LinearDimensionXContainer)
